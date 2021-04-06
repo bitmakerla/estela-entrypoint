@@ -1,0 +1,2 @@
+# scraping-product-entrypoint
+
