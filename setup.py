@@ -10,7 +10,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'bit-crawl = bit_entrypoint.__main__:crawl',
+            'bm-crawl = bm_scrapy.__main__:crawl',
+            'bm-describe-project = bm_scrapy.__main__:describe_project',
         ],
     },
 )
