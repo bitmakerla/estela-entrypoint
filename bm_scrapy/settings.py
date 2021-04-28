@@ -29,7 +29,9 @@ def load_default_settings(settings):
     # Load the default APP settings e.g. HubstorageDownloaderMiddleware
     downloader_middlewares = {}
     spider_middlewares = {}
-    extensions = {}
+    extensions = {
+        'bm_scrapy.extensions.ItemStorageExtension': 100,
+    }
     settings.get('DOWNLOADER_MIDDLEWARES_BASE').update(downloader_middlewares)
     settings.get('EXTENSIONS_BASE').update(extensions)
     settings.get('SPIDER_MIDDLEWARES_BASE').update(spider_middlewares)
