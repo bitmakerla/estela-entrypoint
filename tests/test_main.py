@@ -5,6 +5,7 @@ import mock
 from bm_scrapy.__main__ import run_scrapy
 from bm_scrapy.__main__ import run_code
 from bm_scrapy.__main__ import describe_project
+from bm_scrapy.__main__ import setup_and_launch
 from bm_scrapy.__main__ import crawl
 
 
@@ -33,8 +34,8 @@ def test_run_code_commands_module(mock_run_scrapy):
 @mock.patch.dict(os.environ, {'JOB_INFO':'{"spider": "sample", "key": "6/6/6"}'})
 @mock.patch('bm_scrapy.env.setup_scrapy_conf')
 @mock.patch('bm_scrapy.__main__.run_code')
-def test_crawl(mock_run_code, mock_setup_scrapy_conf):
-    crawl()
+def test_setup_and_launch(mock_run_code, mock_setup_scrapy_conf):
+    setup_and_launch()
     assert mock_run_code.called
     assert mock_setup_scrapy_conf.called
     expected_env = {
@@ -60,3 +61,11 @@ def test_describe_project(mock_run_code, mock_setup_scrapy_conf):
     assert run_args[0] == expected_args
     assert run_args[1] == 'bm_scrapy.commands'
     
+
+@mock.patch('bm_scrapy.writer.pipe_writer')
+@mock.patch('bm_scrapy.__main__.setup_and_launch')
+def test_crawl( mock_setup_and_launch, mock_pipe_writer):
+    crawl()
+    assert mock_pipe_writer.open.called
+    assert mock_setup_and_launch.called
+    assert not mock_pipe_writer.close.called

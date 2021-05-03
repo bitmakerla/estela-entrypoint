@@ -37,11 +37,8 @@ def describe_project():
     run_code(['scrapy','describe_project'] + sys.argv[1:], 'bm_scrapy.commands')
 
 
-def crawl():
-    # bm-crawl command
-    # JOB_INFO: '{"spider": "books", "key":"projectid/spiderid/jobid"}'
-    
-    # set FIFO pipe [!] missing
+def setup_and_launch():
+     # JOB_INFO='{"spider": "books", "key":"projectid/spiderid/jobid"}'
     try:
         from bm_scrapy.env import decode_job, get_args_and_env, setup_scrapy_conf
         # Read Job info from env
@@ -54,5 +51,20 @@ def crawl():
     except:
         print("Environment variables were not defined properly")
         raise
-
+    
     run_code(args)
+
+    
+def crawl():
+    # bm-crawl command
+    try:
+        from bm_scrapy.writer import pipe_writer
+        pipe_writer.open()
+    except Exception:
+        print("Error while opening the fifo pipe in the writer")
+        return 1
+    try:
+        setup_and_launch()
+    except:
+        return 1
+    return 0
