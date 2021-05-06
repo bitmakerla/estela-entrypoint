@@ -61,7 +61,7 @@ def test_write_item(writer, queue):
     line = queue.get(timeout=1)
     cmd, payload = parse_line(line)
     assert queue.empty()
-    assert cmd == 'I'
+    assert cmd == 'ITM'
     assert payload == {'my': 'item'}
 
     
@@ -71,5 +71,5 @@ def test_fin(writer, queue):
     line = queue.get(timeout=1)
     cmd, payload = parse_line(line)
     assert queue.empty()
-    assert cmd == 'F'
+    assert cmd == 'FIN'
     assert payload == {'finish_reason': reason}

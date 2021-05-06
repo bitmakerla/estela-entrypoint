@@ -62,9 +62,10 @@ def crawl():
         pipe_writer.open()
     except Exception:
         print("Error while opening the fifo pipe in the writer")
-        return 1
+        sys.exit(1)
     try:
         setup_and_launch()
-    except:
-        return 1
-    return 0
+    except SystemExit as ex:
+        sys.exit(ex.code)
+    sys.exit(0)
+    

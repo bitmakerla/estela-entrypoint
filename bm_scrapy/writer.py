@@ -34,13 +34,13 @@ class PipeWriter:
             self.pipe.flush()
     
     def write_item(self, item):
-        self.write('I', item)
+        self.write('ITM', item)
 
     def write_request(self, req):
-        self.write('R', req)
+        self.write('REQ', req)
 
     def write_fin(self, reason):
-        self.write('F', {'finish_reason': reason})
+        self.write('FIN', {'finish_reason': reason})
 
 
 pipe_writer = PipeWriter(os.environ.get('FIFO_PATH',''))
