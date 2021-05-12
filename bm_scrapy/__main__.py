@@ -1,7 +1,7 @@
 import os
 import sys
 
-
+    
 def run_scrapy(argv, settings):
     from scrapy.cmdline import execute
     # an intermediate function might be needed for other commands [!] missing
@@ -11,9 +11,8 @@ def run_scrapy(argv, settings):
     
 def run_code(args, commands_module=None):
     try:
-        # define and populate setting
         from bm_scrapy.settings import populate_settings
-        # API shub data might be sent [!] missing
+        # API data might be sent [!] missing
         settings = populate_settings()
         if commands_module:
             settings.set('COMMANDS_MODULE', commands_module, priority='cmdline')
@@ -32,7 +31,6 @@ def describe_project():
     # bm-describe-project command
     from bm_scrapy.env import setup_scrapy_conf
     setup_scrapy_conf()
-
     # custom scrapy command + args
     run_code(['scrapy','describe_project'] + sys.argv[1:], 'bm_scrapy.commands')
 
@@ -55,17 +53,23 @@ def setup_and_launch():
     run_code(args)
 
     
-def crawl():
+def main():
     # bm-crawl command
     try:
         from bm_scrapy.writer import pipe_writer
         pipe_writer.open()
     except Exception:
         print("Error while opening the fifo pipe in the writer")
-        sys.exit(1)
+        return 1
     try:
         setup_and_launch()
     except SystemExit as ex:
-        sys.exit(ex.code)
-    sys.exit(0)
+        return ex.code
+    except:
+        return 1
+    return 0
+
+
+if __name__== '__main__':
+    sys.exit(main())
     

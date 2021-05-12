@@ -6,7 +6,7 @@ from bm_scrapy.__main__ import run_scrapy
 from bm_scrapy.__main__ import run_code
 from bm_scrapy.__main__ import describe_project
 from bm_scrapy.__main__ import setup_and_launch
-from bm_scrapy.__main__ import crawl
+from bm_scrapy.__main__ import main
 
 
 @mock.patch('scrapy.cmdline.execute')
@@ -64,8 +64,8 @@ def test_describe_project(mock_run_code, mock_setup_scrapy_conf):
 
 @mock.patch('bm_scrapy.writer.pipe_writer')
 @mock.patch('bm_scrapy.__main__.setup_and_launch')
-def test_crawl( mock_setup_and_launch, mock_pipe_writer):
-    crawl()
+def test_main( mock_setup_and_launch, mock_pipe_writer):
+    main()
     assert mock_pipe_writer.open.called
     assert mock_setup_and_launch.called
     assert not mock_pipe_writer.close.called
