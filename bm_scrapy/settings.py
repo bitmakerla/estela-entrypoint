@@ -27,10 +27,12 @@ def update_deprecated_classpaths(settings):
                 
 def load_default_settings(settings):
     # Load the default APP settings e.g. HubstorageDownloaderMiddleware
-    downloader_middlewares = {}
+    downloader_middlewares = {
+        'bm_scrapy.middlewares.StorageDownloaderMiddleware': 1000,
+    }
     spider_middlewares = {}
     extensions = {
-        'bm_scrapy.extensions.ItemStorageExtension': 100,
+        'bm_scrapy.extensions.ItemStorageExtension': 1000,
     }
     settings.get('DOWNLOADER_MIDDLEWARES_BASE').update(downloader_middlewares)
     settings.get('EXTENSIONS_BASE').update(extensions)

@@ -2,6 +2,8 @@ import os
 import json
 import threading
 
+from bm_scrapy.utils import parse_time
+
 
 class PipeWriter:
     def __init__(self, fifo_path):
@@ -36,7 +38,16 @@ class PipeWriter:
     def write_item(self, item):
         self.write('ITM', item)
 
-    def write_request(self, req):
+    def write_request(self, url, status, fp, duration, method, rsize):
+        req = {
+            'url': url,
+            'status': int(status),
+            'method': method,
+            'duration': int(duration),
+            'time': parse_time(),
+            'response_size': int(rsize),
+            'fingerprint': fp,
+        }
         self.write('REQ', req)
 
     def write_fin(self, reason):

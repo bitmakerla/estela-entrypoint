@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'bm-crawl = bm_scrapy.__main__:crawl',
+            'bm-crawl = bm_scrapy.__main__:main',
             'bm-describe-project = bm_scrapy.__main__:describe_project',
         ],
     },
