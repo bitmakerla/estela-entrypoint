@@ -8,5 +8,5 @@ The package implements a wrapper layer to extract job data from environment, pre
 
 ## Installation
 ```
-python setup.py install
+python setup.py install 
 ```
