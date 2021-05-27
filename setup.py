@@ -7,6 +7,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'Scrapy>=1.0',
+        'kafka-python'
     ],
     entry_points={
         'console_scripts': [
