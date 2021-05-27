@@ -8,9 +8,19 @@ def decode_job():
         return json.loads(job_data)
 
 
+def get_api_args(args_dict):
+    if not args_dict:
+        return []
+    args = []
+    for key, value in dict(args_dict).items():
+        args += ['-a', '{}={}'.format(key, value)]
+    return args
+
+
 def get_args_and_env(msg):
     args = ['scrapy', 'crawl', str(msg['spider'])]
-    # consider API args and settings [!] missing
+    args += get_api_args(msg.get('args'))
+    # consider API settings [!] missing
     env = {
         'BM_JOB': msg['key'],
         'BM_SPIDER': msg['spider']
@@ -22,4 +32,3 @@ def setup_scrapy_conf():
     # scrapy.cfg is required by scrapy.utils.project.data_path
     if not os.path.exists('scrapy.cfg'):
         open('scrapy.cfg', 'w').close()
-        

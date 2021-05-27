@@ -60,12 +60,9 @@ def test_describe_project(mock_run_code, mock_setup_scrapy_conf):
     run_args = mock_run_code.call_args[0]
     assert run_args[0] == expected_args
     assert run_args[1] == 'bm_scrapy.commands'
-    
 
-@mock.patch('bm_scrapy.writer.pipe_writer')
+
 @mock.patch('bm_scrapy.__main__.setup_and_launch')
-def test_main( mock_setup_and_launch, mock_pipe_writer):
+def test_main(mock_setup_and_launch):
     main()
-    assert mock_pipe_writer.open.called
     assert mock_setup_and_launch.called
-    assert not mock_pipe_writer.close.called

@@ -20,7 +20,6 @@ def run_code(args, commands_module=None):
         print("Settings initialization failed")
         raise
     try:
-        # run spider
         run_scrapy(args, settings)
     except Exception:
         print("Job runtime exception")
@@ -28,21 +27,20 @@ def run_code(args, commands_module=None):
 
 
 def describe_project():
-    # bm-describe-project command
+    """Describe scrapy project."""
     from bm_scrapy.env import setup_scrapy_conf
     setup_scrapy_conf()
-    # custom scrapy command + args
+
     run_code(['scrapy','describe_project'] + sys.argv[1:], 'bm_scrapy.commands')
 
 
 def setup_and_launch():
-     # JOB_INFO='{"spider": "books", "key":"projectid/spiderid/jobid"}'
     try:
         from bm_scrapy.env import decode_job, get_args_and_env, setup_scrapy_conf
-        # Read Job info from env
         job = decode_job()
         assert job, 'JOB_INFO must be set'
         args, env = get_args_and_env(job)
+
         os.environ.update(env)
         setup_scrapy_conf()
         #init logger [!] missing
@@ -54,13 +52,7 @@ def setup_and_launch():
 
     
 def main():
-    # bm-crawl command
-    try:
-        from bm_scrapy.writer import pipe_writer
-        pipe_writer.open()
-    except Exception:
-        print("Error while opening the fifo pipe in the writer")
-        return 1
+    """Start the crawling process."""
     try:
         setup_and_launch()
     except SystemExit as ex:
@@ -72,4 +64,3 @@ def main():
 
 if __name__== '__main__':
     sys.exit(main())
-    
