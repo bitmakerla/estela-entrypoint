@@ -28,7 +28,7 @@ def update_deprecated_classpaths(settings):
 def load_default_settings(settings):
     # Load the default BM-APP settings
     downloader_middlewares = {
-        #'bm_scrapy.middlewares.StorageDownloaderMiddleware': 1000,
+        'bm_scrapy.middlewares.StorageDownloaderMiddleware': 1000,
     }
     spider_middlewares = {}
     extensions = {
