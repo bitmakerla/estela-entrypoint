@@ -19,11 +19,11 @@ def get_api_args(args_dict):
 
 def get_args_and_env(msg):
     args = ['scrapy', 'crawl', str(msg['spider'])]
-    args += get_api_args(msg.get('args'))
+    args += get_api_args(msg.get('args', {}))
     # consider API settings [!] missing
     env = {
-        'BM_JOB': msg['key'],
-        'BM_SPIDER': msg['spider']
+        'BM_SPIDER_JID': msg['key'],
+        'BM_SPIDER_NAME': msg['spider']
     }
     return args, env
 
