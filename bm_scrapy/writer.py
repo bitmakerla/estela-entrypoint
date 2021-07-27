@@ -10,11 +10,11 @@ class PipeWriter:
         self.path = fifo_path
         self.lock = threading.Lock()
         self.pipe = None
-        
+
     def open(self):
         try:
             with self.lock:
-                self.pipe = open(self.path, 'wb')
+                self.pipe = open(self.path, "wb")
         except:
             raise RuntimeError
 
@@ -23,36 +23,35 @@ class PipeWriter:
             self.pipe.close()
 
     def write(self, command, payload):
-        command = command.encode('utf-8')
+        command = command.encode("utf-8")
         payload = json.dumps(
             payload,
-            separators=(',', ':'),
-        ).encode('utf-8')
+            separators=(",", ":"),
+        ).encode("utf-8")
         with self.lock:
             self.pipe.write(command)
-            self.pipe.write(b' ')
+            self.pipe.write(b" ")
             self.pipe.write(payload)
-            self.pipe.write(b'\n')
+            self.pipe.write(b"\n")
             self.pipe.flush()
-    
+
     def write_item(self, item):
-        self.write('ITM', item)
+        self.write("ITM", item)
 
     def write_request(self, url, status, fp, duration, method, rsize):
         req = {
-            'url': url,
-            'status': int(status),
-            'method': method,
-            'duration': int(duration),
-            'time': parse_time(),
-            'response_size': int(rsize),
-            'fingerprint': fp,
+            "url": url,
+            "status": int(status),
+            "method": method,
+            "duration": int(duration),
+            "time": parse_time(),
+            "response_size": int(rsize),
+            "fingerprint": fp,
         }
-        self.write('REQ', req)
+        self.write("REQ", req)
 
     def write_fin(self, reason):
-        self.write('FIN', {'finish_reason': reason})
+        self.write("FIN", {"finish_reason": reason})
 
 
-pipe_writer = PipeWriter(os.environ.get('FIFO_PATH',''))
-
+pipe_writer = PipeWriter(os.environ.get("FIFO_PATH", ""))

@@ -1,0 +1,5 @@
+Scrapy>=1.0
+kafka-python
+requests
+black
+pytest
