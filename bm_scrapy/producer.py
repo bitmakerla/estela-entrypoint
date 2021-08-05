@@ -8,17 +8,18 @@ from kafka import KafkaProducer
 
 def connect_kafka_producer():
     _producer = None
-    bootstrap_server = [
-        "{}:{}".format(
-            os.getenv("KAFKA_ADVERTISED_HOST_NAME", "localhost"),
-            os.getenv("KAFKA_ADVERTISED_PORT", "9092"),
-        )
+    kafka_advertised_port = os.getenv("KAFKA_ADVERTISED_PORT", "9092")
+    kafka_advertised_listeners = os.getenv("KAFKA_ADVERTISED_LISTENERS").split(",")
+    bootstrap_servers = [
+        "{}:{}".format(kafka_advertised_listener, kafka_advertised_port)
+        for kafka_advertised_listener in kafka_advertised_listeners
     ]
     try:
         _producer = KafkaProducer(
-            bootstrap_servers=bootstrap_server,
-            api_version=(0, 10),
+            bootstrap_servers=bootstrap_servers,
             value_serializer=lambda x: json.dumps(x).encode("utf-8"),
+            acks=1,
+            retries=1,
         )
     except Exception as ex:
         logger("Exception while connecting Kafka")
