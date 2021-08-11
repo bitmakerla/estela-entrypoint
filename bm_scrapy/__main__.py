@@ -1,7 +1,6 @@
 import os
 import sys
-
-from bm_scrapy import logger
+import logging
 
 
 def run_scrapy(argv, settings):
@@ -20,13 +19,13 @@ def run_code(args, commands_module=None):
         settings = populate_settings()
         if commands_module:
             settings.set("COMMANDS_MODULE", commands_module, priority="cmdline")
-    except:
-        logger("Settings initialization failed")
+    except Exception:
+        logging.exception("Settings initialization failed")
         raise
     try:
         run_scrapy(args, settings)
     except Exception:
-        logger("Job runtime exception")
+        logging.exception("Job runtime exception")
         raise
 
 
@@ -51,7 +50,7 @@ def setup_and_launch():
         setup_scrapy_conf()
         # init logger [!] missing
     except:
-        print("Environment variables were not defined properly")
+        logging.exception("Environment variables were not defined properly")
         raise
 
     run_code(args)
