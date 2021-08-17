@@ -1,6 +1,5 @@
 import json
 import subprocess
-from bm_scrapy import logger
 
 from scrapy.commands import ScrapyCommand
 
@@ -47,4 +46,4 @@ class Command(ScrapyCommand):
                 universal_newlines=True,
             )
             result["image"] = output
-        logger(json.dumps(result))
+        print(json.dumps(result))

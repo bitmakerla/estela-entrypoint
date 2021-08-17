@@ -2,7 +2,6 @@ import os
 import json
 import logging
 
-from bm_scrapy import logger
 from kafka import KafkaProducer
 
 
@@ -18,15 +17,15 @@ def connect_kafka_producer():
         _producer = KafkaProducer(
             bootstrap_servers=bootstrap_servers,
             value_serializer=lambda x: json.dumps(x).encode("utf-8"),
+            api_version=(0, 10),
             acks=1,
             retries=1,
         )
     except Exception as ex:
-        logger("Exception while connecting Kafka")
-        logger(str(ex))
+        logging.error("Exception while connecting Kafka: {}".format(str(ex)))
     finally:
         return _producer
 
 
 def on_kafka_send_error(excp):
-    logging.getLogger("scrapy").error(str(excp))
+    logging.error(str(excp))
