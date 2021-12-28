@@ -54,6 +54,7 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
+        parser_stats = json.dumps(self.stats.get_stats(),default=datetime_to_json)
         data = {
             "jid": os.getenv("BM_COLLECTION"),
             "payload": self.stats.get_stats(),
