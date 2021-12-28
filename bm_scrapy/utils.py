@@ -6,3 +6,7 @@ def parse_time(date=None):
         date = datetime.now()
     parsed_time = date.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
     return parsed_time
+
+def datetime_to_json(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()

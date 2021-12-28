@@ -1,6 +1,7 @@
 import os
 import requests
 
+from bm_scrapy.utils import datetime_to_json
 from scrapy import signals
 from scrapy.exporters import PythonItemExporter
 from bm_scrapy.producer import connect_kafka_producer, on_kafka_send_error
@@ -54,7 +55,7 @@ class ItemStorageExtension:
     def spider_closed(self, spider, reason):
         data = {
             "jid": os.getenv("BM_SPIDER_JOB"),
-            "payload": self.stats.get_stats(),
+            "payload": json.dumps(self.stats.get_stats(),default=datetime_to_json),
         }
         self.update_job_status(
             COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS
