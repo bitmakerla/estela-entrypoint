@@ -14,7 +14,11 @@ FINISHED_REASON = "finished"
 
 
 class ItemStorageExtension:
+<<<<<<< HEAD
     def __init__(self, stats):
+=======
+    def __init__(self,stats):
+>>>>>>> BITMAKER-1295: Initial Commit
         self.stats = stats
         self.producer = connect_kafka_producer()
         exporter_kwargs = {"binary": False}
@@ -54,13 +58,9 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
-        print("---BITMAKER---")
         data = {
             "jid": os.getenv("BM_SPIDER_JOB"),
-            "payload": {
-                "finish_reason": str(reason),
-                "stats": str(self.stats.get_stats())
-            },
+            "payload": self.stats.get_stats(),
         }
         self.update_job_status(
             COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS
