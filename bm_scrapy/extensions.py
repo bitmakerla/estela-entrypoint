@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 
 from bm_scrapy.utils import datetime_to_json
 from scrapy import signals
