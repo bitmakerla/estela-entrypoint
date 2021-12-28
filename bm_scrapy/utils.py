@@ -8,5 +8,5 @@ def parse_time(date=None):
     return parsed_time
 
 def datetime_to_json(o):
-    if isinstance(o, datetime.datetime):
+    if isinstance(o, datetime):
         return o.__str__()
