@@ -51,10 +51,12 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
+        print("---BITMAKER---")
         data = {
-            "jid": self.job_jid,
+            "jid": os.getenv("BM_SPIDER_JOB"),
             "payload": {
                 "finish_reason": str(reason),
+                "stats": str(self.stats.get_stats())
             },
         }
         self.update_job_status(
