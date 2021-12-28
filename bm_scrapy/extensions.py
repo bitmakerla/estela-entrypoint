@@ -14,11 +14,7 @@ FINISHED_REASON = "finished"
 
 
 class ItemStorageExtension:
-<<<<<<< HEAD
     def __init__(self, stats):
-=======
-    def __init__(self,stats):
->>>>>>> BITMAKER-1295: Initial Commit
         self.stats = stats
         self.producer = connect_kafka_producer()
         exporter_kwargs = {"binary": False}
