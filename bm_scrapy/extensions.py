@@ -14,7 +14,7 @@ FINISHED_REASON = "finished"
 
 
 class ItemStorageExtension:
-    def __init__(self,stats):
+    def __init__(self, stats):
         self.stats = stats
         self.producer = connect_kafka_producer()
         exporter_kwargs = {"binary": False}
@@ -54,7 +54,7 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
-        parser_stats = json.dumps(self.stats.get_stats(),default=datetime_to_json)
+        parser_stats = json.dumps(self.stats.get_stats(), default=datetime_to_json)
         data = {
             "jid": os.getenv("BM_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
