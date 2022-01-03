@@ -11,3 +11,4 @@ def parse_time(date=None):
 def datetime_to_json(o):
     if isinstance(o, datetime):
         return o.__str__()
+    raise TypeError("Type %s not serializable" % type(obj))
