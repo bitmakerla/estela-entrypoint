@@ -1,6 +1,8 @@
 import os
 import requests
+import json
 
+from bm_scrapy.utils import datetime_to_json
 from scrapy import signals
 from scrapy.exporters import PythonItemExporter
 from bm_scrapy.producer import connect_kafka_producer, on_kafka_send_error
@@ -12,7 +14,8 @@ FINISHED_REASON = "finished"
 
 
 class ItemStorageExtension:
-    def __init__(self):
+    def __init__(self, stats):
+        self.stats = stats
         self.producer = connect_kafka_producer()
         exporter_kwargs = {"binary": False}
         self.exporter = PythonItemExporter(**exporter_kwargs)
@@ -36,7 +39,7 @@ class ItemStorageExtension:
 
     @classmethod
     def from_crawler(cls, crawler):
-        ext = cls()
+        ext = cls(crawler.stats)
         crawler.signals.connect(ext.item_scraped, signals.item_scraped)
         crawler.signals.connect(ext.spider_opened, signals.spider_opened)
         crawler.signals.connect(ext.spider_closed, signals.spider_closed)
@@ -51,11 +54,10 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
+        parser_stats = json.dumps(self.stats.get_stats(), default=datetime_to_json)
         data = {
-            "jid": self.job_jid,
-            "payload": {
-                "finish_reason": str(reason),
-            },
+            "jid": os.getenv("BM_SPIDER_JOB"),
+            "payload": json.loads(parser_stats),
         }
         self.update_job_status(
             COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS
