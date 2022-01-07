@@ -57,7 +57,7 @@ class ItemStorageExtension:
         parser_stats = json.dumps(self.stats.get_stats(), default=datetime_to_json)
         data = {
             "jid": os.getenv("BM_COLLECTION"),
-            "payload": self.stats.get_stats(),
+            "payload": json.loads(parser_stats),
         }
         self.update_job_status(
             COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS
