@@ -26,6 +26,7 @@ def get_args_and_env(msg):
         "BM_SPIDER_NAME": msg["spider"],
         "BM_API_HOST": msg["api_host"],
         "BM_AUTH_TOKEN": msg["auth_token"],
+        "BM_COLLECTION": msg["collection"],
     }
     return args, env
 

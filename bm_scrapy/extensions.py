@@ -48,14 +48,14 @@ class ItemStorageExtension:
     def item_scraped(self, item):
         item = self.exporter.export_item(item)
         data = {
-            "jid": os.getenv("BM_SPIDER_JOB"),
+            "jid": os.getenv("BM_COLLECTION"),
             "payload": dict(item),
         }
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
         data = {
-            "jid": os.getenv("BM_SPIDER_JOB"),
+            "jid": os.getenv("BM_COLLECTION"),
             "payload": self.stats.get_stats(),
         }
         self.update_job_status(
