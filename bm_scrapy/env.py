@@ -27,6 +27,7 @@ def get_args_and_env(msg):
         "BM_API_HOST": msg["api_host"],
         "BM_AUTH_TOKEN": msg["auth_token"],
         "BM_COLLECTION": msg["collection"],
+        "UNIQUE": msg["unique"],
     }
     return args, env
 
