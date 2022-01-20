@@ -57,7 +57,7 @@ class ItemStorageExtension:
     def spider_closed(self, spider, reason):
         parser_stats = json.dumps(self.stats.get_stats(), default=datetime_to_json)
         data = {
-            "jid": os.getenv("BM_COLLECTION"),
+            "jid": os.getenv("BM_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
         }
         self.update_job_status(
