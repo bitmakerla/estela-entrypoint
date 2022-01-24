@@ -31,6 +31,7 @@ Job specifications are passed through env variables:
   - [Required] _auth_token_: User token authentication.
   - [Required] _api_host_: API host URL.
   - [Optional] _args_: Dictionary with job arguments.
+  - [Required] _collection_: String with name of collection where items will be stored.
 - `KAFKA_ADVERTISED_LISTENERS`: List of advertised hosts in a comma-separated style.
 - `KAFKA_ADVERTISED_PORT`: Default value: _9092_.
 
