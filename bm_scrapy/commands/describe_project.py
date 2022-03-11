@@ -1,6 +1,8 @@
 import json
 import subprocess
+from pkg_resources import parse_version
 
+from scrapy import __version__
 from scrapy.commands import ScrapyCommand
 
 """
@@ -28,11 +30,15 @@ class Command(ScrapyCommand):
 
     def add_options(self, parser):
         super(Command, self).add_options(parser)
-        parser.add_option(
-            "--image",
-            action="store_true",
-            help="List the installed Linux and Python packages " "within the image.",
-        )
+        args = {
+            "action": "store_true",
+            "help": "List the installed Linux and Python packages " "within the image.",
+            "dest": None,
+        }
+        if parse_version("2.6.0") > parse_version(__version__):
+            parser.add_option("--image", **args)
+        else:
+            parser.add_argument("--image", **args)
 
     def run(self, args, opts):
         result = {
