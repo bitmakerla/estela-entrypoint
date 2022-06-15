@@ -1,11 +1,13 @@
-import os
-import requests
 import json
+import os
+from datetime import datetime, timedelta
 
-from bm_scrapy.utils import datetime_to_json
+import requests
 from scrapy import signals
 from scrapy.exporters import PythonItemExporter
+
 from bm_scrapy.producer import connect_kafka_producer, on_kafka_send_error
+from bm_scrapy.utils import datetime_to_json
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
@@ -28,12 +30,21 @@ class ItemStorageExtension:
         )
 
     def spider_opened(self, spider):
-        self.update_job_status(RUNNING_STATUS)
+        self.update_job(status=RUNNING_STATUS)
 
-    def update_job_status(self, status):
+    def update_job(
+        self,
+        status,
+        lifespan=timedelta(seconds=0),
+        total_bytes=0,
+    ):
         requests.patch(
             self.job_url,
-            data={"status": status},
+            data={
+                "status": status,
+                "lifespan": lifespan,
+                "total_response_bytes": total_bytes,
+            },
             headers={"Authorization": "Token {}".format(self.auth_token)},
         )
 
@@ -55,13 +66,18 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
-        parser_stats = json.dumps(self.stats.get_stats(), default=datetime_to_json)
+        spider_stats = self.stats.get_stats()
+        parser_stats = json.dumps(spider_stats, default=datetime_to_json)
         data = {
             "jid": os.getenv("BM_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
         }
-        self.update_job_status(
-            COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS
+
+        self.update_job(
+            status=COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS,
+            lifespan=spider_stats.get("elapsed_time_seconds", 0),
+            total_bytes=spider_stats.get("downloader/response_bytes", 0),
         )
+
         self.producer.send("job_logs", value=data).add_errback(on_kafka_send_error)
         self.producer.flush()
