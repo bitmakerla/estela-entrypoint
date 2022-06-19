@@ -25,7 +25,7 @@ def test_get_args_and_env():
     msg = {
         "spider": "demo",
         "key": "1-2-3",
-        "api_host": "http://bitmaker-api.com",
+        "api_host": "http://estela-api.com",
         "auth_token": "",
         "args": {"arg1": "val1", "arg2": "val2"},
     }
@@ -43,7 +43,7 @@ def test_get_args_and_env():
     assert result[1] == {
         "BM_SPIDER_JOB": "1-2-3",
         "BM_SPIDER_NAME": "demo",
-        "BM_API_HOST": "http://bitmaker-api.com",
+        "BM_API_HOST": "http://estela-api.com",
         "BM_AUTH_TOKEN": "",
     }
 

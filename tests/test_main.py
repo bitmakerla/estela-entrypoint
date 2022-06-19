@@ -9,7 +9,7 @@ from bm_scrapy.__main__ import setup_and_launch
 from bm_scrapy.__main__ import main
 
 
-JOB_INFO = '{"spider": "sample", "key": "6-6-6", "api_host": "http://bitmaker-api.com", "auth_token": ""}'
+JOB_INFO = '{"spider": "sample", "key": "6-6-6", "api_host": "http://estela-api.com", "auth_token": ""}'
 
 
 @mock.patch("scrapy.cmdline.execute")
@@ -44,7 +44,7 @@ def test_setup_and_launch(mock_run_code, mock_setup_scrapy_conf):
     expected_env = {
         "BM_SPIDER_JOB": "6-6-6",
         "BM_SPIDER_NAME": "sample",
-        "BM_API_HOST": "http://bitmaker-api.com",
+        "BM_API_HOST": "http://estela-api.com",
         "BM_AUTH_TOKEN": "",
     }
     expected_args = ["scrapy", "crawl", "sample"]
