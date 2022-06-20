@@ -4,12 +4,12 @@ import pytest
 import threading
 
 from queue import Queue
-from bm_scrapy.writer import PipeWriter
+from estela_scrapy.writer import PipeWriter
 
 
 @pytest.fixture
 def fifo(tmpdir):
-    path = os.path.join(str(tmpdir.mkdir("bm")), "temp.fifo")
+    path = os.path.join(str(tmpdir.mkdir("estela")), "temp.fifo")
     os.mkfifo(path)
     return path
 

@@ -1,10 +1,10 @@
 import os
 from unittest import mock
 
-from bm_scrapy.env import decode_job
-from bm_scrapy.env import get_api_args
-from bm_scrapy.env import get_args_and_env
-from bm_scrapy.env import setup_scrapy_conf
+from estela_scrapy.env import decode_job
+from estela_scrapy.env import get_api_args
+from estela_scrapy.env import get_args_and_env
+from estela_scrapy.env import setup_scrapy_conf
 
 
 @mock.patch.dict(os.environ, {"JOB_INFO": '{"key": "value"}'})
@@ -41,10 +41,10 @@ def test_get_args_and_env():
         "arg2=val2",
     ]
     assert result[1] == {
-        "BM_SPIDER_JOB": "1-2-3",
-        "BM_SPIDER_NAME": "demo",
-        "BM_API_HOST": "http://estela-api.com",
-        "BM_AUTH_TOKEN": "",
+        "ESTELA_SPIDER_JOB": "1-2-3",
+        "ESTELA_SPIDER_NAME": "demo",
+        "ESTELA_API_HOST": "http://estela-api.com",
+        "ESTELA_AUTH_TOKEN": "",
     }
 
 

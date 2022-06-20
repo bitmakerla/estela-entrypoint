@@ -13,7 +13,7 @@ def run_scrapy(argv, settings):
 
 def run_code(args, commands_module=None):
     try:
-        from bm_scrapy.settings import populate_settings
+        from estela_scrapy.settings import populate_settings
 
         # API data might be sent [!] missing
         settings = populate_settings()
@@ -31,16 +31,16 @@ def run_code(args, commands_module=None):
 
 def describe_project():
     """Describe scrapy project."""
-    from bm_scrapy.env import setup_scrapy_conf
+    from estela_scrapy.env import setup_scrapy_conf
 
     setup_scrapy_conf()
 
-    run_code(["scrapy", "describe_project"] + sys.argv[1:], "bm_scrapy.commands")
+    run_code(["scrapy", "describe_project"] + sys.argv[1:], "estela_scrapy.commands")
 
 
 def setup_and_launch():
     try:
-        from bm_scrapy.env import decode_job, get_args_and_env, setup_scrapy_conf
+        from estela_scrapy.env import decode_job, get_args_and_env, setup_scrapy_conf
 
         job = decode_job()
         assert job, "JOB_INFO must be set"

@@ -14,8 +14,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "bm-crawl = bm_scrapy.__main__:main",
-            "bm-describe-project = bm_scrapy.__main__:describe_project",
+            "estela-crawl = estela_scrapy.__main__:main",
+            "estela-describe-project = estela_scrapy.__main__:describe_project",
         ],
     },
     classifiers=[
