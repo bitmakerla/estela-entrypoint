@@ -37,6 +37,8 @@ class ItemStorageExtension:
         status,
         lifespan=timedelta(seconds=0),
         total_bytes=0,
+        item_count=0,
+        request_count=0,
     ):
         requests.patch(
             self.job_url,
@@ -44,6 +46,8 @@ class ItemStorageExtension:
                 "status": status,
                 "lifespan": lifespan,
                 "total_response_bytes": total_bytes,
+                "item_count": item_count,
+                "request_count": request_count,
             },
             headers={"Authorization": "Token {}".format(self.auth_token)},
         )
@@ -67,17 +71,18 @@ class ItemStorageExtension:
 
     def spider_closed(self, spider, reason):
         spider_stats = self.stats.get_stats()
+        self.update_job(
+            status=COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS,
+            lifespan=spider_stats.get("elapsed_time_seconds", 0),
+            total_bytes=spider_stats.get("downloader/response_bytes", 0),
+            item_count=spider_stats.get("item_scraped_count", 0),
+            request_count=spider_stats.get("downloader/request_count", 0),
+        )
+
         parser_stats = json.dumps(spider_stats, default=datetime_to_json)
         data = {
             "jid": os.getenv("BM_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
         }
-
-        self.update_job(
-            status=COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS,
-            lifespan=spider_stats.get("elapsed_time_seconds", 0),
-            total_bytes=spider_stats.get("downloader/response_bytes", 0),
-        )
-
         self.producer.send("job_logs", value=data).add_errback(on_kafka_send_error)
         self.producer.flush()
