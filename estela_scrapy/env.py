@@ -27,7 +27,7 @@ def get_args_and_env(msg):
         "ESTELA_API_HOST": msg["api_host"],
         "ESTELA_AUTH_TOKEN": msg["auth_token"],
         "ESTELA_COLLECTION": msg["collection"],
-        "ESTELA_UNIQUE": msg["unique"],
+        "ESTELA_UNIQUE_COLLECTION": msg["unique"],
     }
     return args, env
 

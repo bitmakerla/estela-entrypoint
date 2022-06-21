@@ -9,7 +9,7 @@ from estela_scrapy.__main__ import setup_and_launch
 from estela_scrapy.__main__ import main
 
 
-JOB_INFO = '{"spider": "sample", "key": "6-6-6", "api_host": "http://estela-api.com", "auth_token": ""}'
+JOB_INFO = '{"spider": "sample", "key": "6-6-6", "api_host": "http://estela-api.com", "auth_token": "", "collection": "sj-1-2", "unique": "True"}'
 
 
 @mock.patch("scrapy.cmdline.execute")

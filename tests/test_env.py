@@ -28,6 +28,8 @@ def test_get_args_and_env():
         "api_host": "http://estela-api.com",
         "auth_token": "",
         "args": {"arg1": "val1", "arg2": "val2"},
+        "collection": "sj-1-2",
+        "unique": "True",
     }
     result = get_args_and_env(msg)
     assert len(result) == 2
@@ -45,6 +47,8 @@ def test_get_args_and_env():
         "ESTELA_SPIDER_NAME": "demo",
         "ESTELA_API_HOST": "http://estela-api.com",
         "ESTELA_AUTH_TOKEN": "",
+        "ESTELA_COLLECTION": "sj-1-2",
+        "ESTELA_UNIQUE_COLLECTION": "True",
     }
 
 
