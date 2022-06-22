@@ -50,7 +50,7 @@ class ItemStorageExtension:
         data = {
             "jid": os.getenv("ESTELA_COLLECTION"),
             "payload": dict(item),
-            "unique": os.getenv("ESTELA_UNIQUE"),
+            "unique": os.getenv("ESTELA_UNIQUE_COLLECTION"),
         }
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
