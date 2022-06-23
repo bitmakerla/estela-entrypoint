@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="bitmaker-entrypoint",
+    name="estela-entrypoint",
     version="0.1",
-    description="Scrapy entrypoint for Bitmaker job runner",
+    description="Scrapy entrypoint for Estela job runner",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -14,8 +14,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "bm-crawl = bm_scrapy.__main__:main",
-            "bm-describe-project = bm_scrapy.__main__:describe_project",
+            "estela-crawl = estela_scrapy.__main__:main",
+            "estela-describe-project = estela_scrapy.__main__:describe_project",
         ],
     },
     classifiers=[

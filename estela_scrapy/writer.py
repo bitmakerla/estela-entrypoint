@@ -2,7 +2,7 @@ import os
 import json
 import threading
 
-from bm_scrapy.utils import parse_time
+from estela_scrapy.utils import parse_time
 
 
 class PipeWriter:

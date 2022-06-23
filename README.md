@@ -1,4 +1,4 @@
-# Scraping Product Entrypoint
+# Estela Entrypoint
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -6,8 +6,8 @@ The package implements a wrapper layer to extract job data from environment, pre
 
 ## Entrypoints
 
-- `bm-crawl`: Process job args and settings to run the job with Scrapy.
-- `bm-describe-project`: Print JSON-encoded project information and image metadata.
+- `estela-crawl`: Process job args and settings to run the job with Scrapy.
+- `estela-describe-project`: Print JSON-encoded project information and image metadata.
 
 ## Installation
 
