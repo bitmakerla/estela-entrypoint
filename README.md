@@ -2,6 +2,13 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+
+[![version](https://img.shields.io/badge/version-0.1-blue)](https://github.com/bitmakerla/estela)
+[![python-version](https://img.shields.io/badge/python-v3.10-orange)](https://www.python.org)
+[![build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/bitmakerla/estela/actions)
+![CI](https://github.com/eslint/eslint/workflows/CI/badge.svg)
+
+
 The package implements a wrapper layer to extract job data from environment, prepare the job properly, and execute it using Scrapy.
 
 ## Entrypoints
