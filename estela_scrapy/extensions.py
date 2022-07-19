@@ -84,5 +84,5 @@ class ItemStorageExtension:
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
         }
-        self.producer.send("job_logs", value=data).add_errback(on_kafka_send_error)
+        self.producer.send("job_stats", value=data).add_errback(on_kafka_send_error)
         self.producer.flush()
