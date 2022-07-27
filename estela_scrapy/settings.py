@@ -24,13 +24,13 @@ def update_deprecated_classpaths(settings):
 
 
 def load_default_settings(settings):
-    # Load the default BM-APP settings
+    # Load the default ESTELA-APP settings
     downloader_middlewares = {
-        "bm_scrapy.middlewares.StorageDownloaderMiddleware": 1000,
+        "estela_scrapy.middlewares.StorageDownloaderMiddleware": 1000,
     }
     spider_middlewares = {}
     extensions = {
-        "bm_scrapy.extensions.ItemStorageExtension": 1000,
+        "estela_scrapy.extensions.ItemStorageExtension": 1000,
     }
     settings.get("DOWNLOADER_MIDDLEWARES_BASE").update(downloader_middlewares)
     settings.get("EXTENSIONS_BASE").update(extensions)

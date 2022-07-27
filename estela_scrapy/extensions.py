@@ -6,8 +6,8 @@ import requests
 from scrapy import signals
 from scrapy.exporters import PythonItemExporter
 
-from bm_scrapy.producer import connect_kafka_producer, on_kafka_send_error
-from bm_scrapy.utils import datetime_to_json
+from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
+from estela_scrapy.utils import datetime_to_json
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
@@ -21,9 +21,9 @@ class ItemStorageExtension:
         self.producer = connect_kafka_producer()
         exporter_kwargs = {"binary": False}
         self.exporter = PythonItemExporter(**exporter_kwargs)
-        job = os.getenv("BM_SPIDER_JOB")
-        host = os.getenv("BM_API_HOST")
-        self.auth_token = os.getenv("BM_AUTH_TOKEN")
+        job = os.getenv("ESTELA_SPIDER_JOB")
+        host = os.getenv("ESTELA_API_HOST")
+        self.auth_token = os.getenv("ESTELA_AUTH_TOKEN")
         self.job_jid, spider_sid, project_pid = job.split(".")
         self.job_url = "{}/api/projects/{}/spiders/{}/jobs/{}".format(
             host, project_pid, spider_sid, self.job_jid
@@ -63,9 +63,9 @@ class ItemStorageExtension:
     def item_scraped(self, item):
         item = self.exporter.export_item(item)
         data = {
-            "jid": os.getenv("BM_COLLECTION"),
+            "jid": os.getenv("ESTELA_COLLECTION"),
             "payload": dict(item),
-            "unique": os.getenv("UNIQUE"),
+            "unique": os.getenv("ESTELA_UNIQUE_COLLECTION"),
         }
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
@@ -81,7 +81,7 @@ class ItemStorageExtension:
 
         parser_stats = json.dumps(spider_stats, default=datetime_to_json)
         data = {
-            "jid": os.getenv("BM_SPIDER_JOB"),
+            "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
         }
         self.producer.send("job_logs", value=data).add_errback(on_kafka_send_error)

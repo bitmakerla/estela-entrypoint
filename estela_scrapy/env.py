@@ -22,12 +22,12 @@ def get_args_and_env(msg):
     args += get_api_args(msg.get("args", {}))
     # consider API settings [!] missing
     env = {
-        "BM_SPIDER_JOB": msg["key"],
-        "BM_SPIDER_NAME": msg["spider"],
-        "BM_API_HOST": msg["api_host"],
-        "BM_AUTH_TOKEN": msg["auth_token"],
-        "BM_COLLECTION": msg["collection"],
-        "UNIQUE": msg["unique"],
+        "ESTELA_SPIDER_JOB": msg["key"],
+        "ESTELA_SPIDER_NAME": msg["spider"],
+        "ESTELA_API_HOST": msg["api_host"],
+        "ESTELA_AUTH_TOKEN": msg["auth_token"],
+        "ESTELA_COLLECTION": msg["collection"],
+        "ESTELA_UNIQUE_COLLECTION": msg["unique"],
     }
     return args, env
 

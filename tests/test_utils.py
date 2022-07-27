@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from bm_scrapy.utils import parse_time
+from estela_scrapy.utils import parse_time
 
 
 def test_parse_time():
