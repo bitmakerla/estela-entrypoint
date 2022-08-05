@@ -37,7 +37,7 @@ def run_code(args, commands_module=None, describe=False):
         logging.exception("Settings initialization failed")
         raise
     try:
-        run_scrapy(args, settings)
+        run_scrapy(args, settings, describe)
     except Exception:
         logging.exception("Job runtime exception")
         raise
