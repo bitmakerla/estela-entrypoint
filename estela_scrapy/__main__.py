@@ -20,7 +20,7 @@ def run_scrapy(argv, settings, describe):
         spider_class = spider_loader.load(argv[2])
 
         crawler_process = CrawlerProcess(settings)
-        crawler = crawler_process.create_crawler()
+        crawler = crawler_process.create_crawler(crawler_process)
         crawler.crawl(spider_class)
         crawler_process.start()
 
