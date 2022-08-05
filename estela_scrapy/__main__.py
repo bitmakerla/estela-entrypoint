@@ -8,7 +8,7 @@ def run_scrapy(argv, settings):
     from scrapy.crawler import CrawlerProcess
     from scrapy.utils.project import get_project_settings
 
-    spider_loader = spiderloader.SpiderLoaders.from_settings()
+    spider_loader = spiderloader.SpiderLoader.from_settings()
     print(f"SCRAPING SPIDER {argv[2]}")
     spider_class = spider_loader.load(argv[2])
     settings = get_project_settings()
