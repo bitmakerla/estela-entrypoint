@@ -70,6 +70,7 @@ class ItemStorageExtension:
         self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
 
     def spider_closed(self, spider, reason):
+        print("I'M CLOSING HERE")
         spider_stats = self.stats.get_stats()
         self.update_job(
             status=COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS,
