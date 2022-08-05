@@ -21,8 +21,10 @@ def run_scrapy(argv, settings, describe):
         print(f"SPIDER {spider}")
 
         crawler_process = CrawlerProcess(settings)
-        crawler_process.crawl(spider_class)
+        crawler = crawler_process.create_crawler(argv[2])
         crawler_process.start()
+
+        print("STATS", crawler.stats.get_stats())
 
 
 def run_code(args, commands_module=None, describe=False):
