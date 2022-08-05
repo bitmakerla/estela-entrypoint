@@ -12,17 +12,17 @@ def run_scrapy(argv, settings, describe):
     else:
         from scrapy import spiderloader
         from scrapy.crawler import CrawlerProcess
-        from scrapy.utils.project import get_project_settings
 
-        settings = get_project_settings()
-        #  spider_loader = spiderloader.SpiderLoader.from_settings(settings)
-        #  print(f"SCRAPING SPIDER {argv[2]}")
-        #  spider = spider_loader.load(argv[2])()
-        #  print(f"SPIDER {spider}")
+        spider_loader = spiderloader.SpiderLoader.from_settings(settings)
+        print(f"SCRAPING SPIDER {argv[2]}")
+        spider_class = spider_loader.load(argv[2])
+        print(f"SPIDER CLASS {spider_class}")
+        spider = spider_class()
+        print(f"SPIDER {spider}")
 
         crawler_process = CrawlerProcess(settings)
-        crawler = crawler_process.create_crawler(argv[2])
-        crawler.crawl()
+        crawler = crawler_process.create_crawler(spider_class)
+        crawler.crawl(spider)
         crawler_process.start()
 
 
