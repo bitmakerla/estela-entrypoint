@@ -18,6 +18,7 @@ def run_scrapy(argv, settings, describe):
         spider_loader = spiderloader.SpiderLoader.from_settings(settings)
         print(f"SCRAPING SPIDER {argv[2]}")
         spider_class = spider_loader.load(argv[2])
+        print(f"SPIDER CLASS {spider_class}")
 
         crawler_process = CrawlerProcess(settings)
         crawler = crawler_process.create_crawler(crawler_process)
