@@ -3,28 +3,29 @@ import sys
 import logging
 
 
-def run_scrapy(argv, settings):
-    from scrapy import spiderloader
-    from scrapy.crawler import CrawlerProcess
-    from scrapy.utils.project import get_project_settings
+def run_scrapy(argv, settings, describe):
+    if describe:
+        from scrapy.cmdline import execute
+        #  an intermediate function might be needed for other commands [!] missing
+        sys.argv = argv
+        execute(settings=settings)
+    else:
+        from scrapy import spiderloader
+        from scrapy.crawler import CrawlerProcess
+        from scrapy.utils.project import get_project_settings
 
-    settings = get_project_settings()
-    spider_loader = spiderloader.SpiderLoader.from_settings(settings)
-    print(f"SCRAPING SPIDER {argv[2]}")
-    spider_class = spider_loader.load(argv[2])
+        settings = get_project_settings()
+        spider_loader = spiderloader.SpiderLoader.from_settings(settings)
+        print(f"SCRAPING SPIDER {argv[2]}")
+        spider_class = spider_loader.load(argv[2])
 
-    crawler_process = CrawlerProcess(settings)
-    crawler = crawler_process.create_crawler()
-    crawler.crawl(spider_class)
-    crawler_process.start()
-
-    #  from scrapy.cmdline import execute
-    # an intermediate function might be needed for other commands [!] missing
-    #  sys.argv = argv
-    #  execute(settings=settings)
+        crawler_process = CrawlerProcess(settings)
+        crawler = crawler_process.create_crawler()
+        crawler.crawl(spider_class)
+        crawler_process.start()
 
 
-def run_code(args, commands_module=None):
+def run_code(args, commands_module=None, describe=False):
     try:
         from estela_scrapy.settings import populate_settings
 
@@ -48,7 +49,7 @@ def describe_project():
 
     setup_scrapy_conf()
 
-    run_code(["scrapy", "describe_project"] + sys.argv[1:], "estela_scrapy.commands")
+    run_code(["scrapy", "describe_project"] + sys.argv[1:], "estela_scrapy.commands", describe=True)
 
 
 def setup_and_launch():
