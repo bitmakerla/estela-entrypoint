@@ -37,7 +37,7 @@ def load_default_settings(settings):
     settings.get("SPIDER_MIDDLEWARES_BASE").update(spider_middlewares)
     # memory_limit [!] missing
     # set other default settings with max priority
-    settings.setdict({"LOG_LEVEL": "DEBUG"}, priority="cmdline")
+    settings.setdict({"LOG_LEVEL": "INFO"}, priority="cmdline")
 
 
 def populate_settings():
