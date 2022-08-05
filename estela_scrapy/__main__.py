@@ -6,14 +6,12 @@ import logging
 def run_scrapy(argv, settings, describe):
     if describe:
         from scrapy.cmdline import execute
-
         #  an intermediate function might be needed for other commands [!] missing
         sys.argv = argv
         execute(settings=settings)
     else:
-        from twisted.internet import reactor
         from scrapy import spiderloader
-        from scrapy.crawler import Crawler, CrawlerProcess
+        from scrapy.crawler import CrawlerProcess
 
         spider_loader = spiderloader.SpiderLoader.from_settings(settings)
         print(f"SCRAPING SPIDER {argv[2]}")
@@ -22,11 +20,9 @@ def run_scrapy(argv, settings, describe):
         spider = spider_class()
         print(f"SPIDER {spider}")
 
-        crawler = Crawler(spider_class, settings)
-        crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
-        #  crawler = crawler_process.create_crawler(spider_class)
-        crawler.crawl(spider_class)
-        crawler.start()
+        crawler_process = CrawlerProcess(settings=settings)
+        crawler_process.crawl(argv[2])
+        crawler_process.start()
 
 
 def run_code(args, commands_module=None, describe=False):
@@ -53,11 +49,7 @@ def describe_project():
 
     setup_scrapy_conf()
 
-    run_code(
-        ["scrapy", "describe_project"] + sys.argv[1:],
-        "estela_scrapy.commands",
-        describe=True,
-    )
+    run_code(["scrapy", "describe_project"] + sys.argv[1:], "estela_scrapy.commands", describe=True)
 
 
 def setup_and_launch():
