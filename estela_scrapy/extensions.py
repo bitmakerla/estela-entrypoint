@@ -1,5 +1,6 @@
 import json
 import os
+from signal import signal
 from datetime import datetime, timedelta
 
 import requests
@@ -58,6 +59,7 @@ class ItemStorageExtension:
         crawler.signals.connect(ext.item_scraped, signals.item_scraped)
         crawler.signals.connect(ext.spider_opened, signals.spider_opened)
         crawler.signals.connect(ext.spider_closed, signals.spider_closed)
+        crawler.signals.connect(ext.spider_closed, signal.SIGUSR1)
         return ext
 
     def item_scraped(self, item):
