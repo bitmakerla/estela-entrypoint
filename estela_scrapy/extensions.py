@@ -59,6 +59,8 @@ class ItemStorageExtension:
         crawler.signals.connect(ext.item_scraped, signals.item_scraped)
         crawler.signals.connect(ext.spider_opened, signals.spider_opened)
         crawler.signals.connect(ext.spider_closed, signals.spider_closed)
+        crawler.signals.connect(ext.spider_idle, signals.spider_idle)
+        crawler.signals.connect(ext.spider_error, signals.spider_error)
         crawler.signals.connect(ext.spider_closed, signal.SIGUSR1)
         return ext
 
@@ -88,3 +90,9 @@ class ItemStorageExtension:
         }
         self.producer.send("job_logs", value=data).add_errback(on_kafka_send_error)
         self.producer.flush()
+
+    def spider_idle(self, spider):
+        print("CAUGHT IN IDLE")
+
+    def spider_error(self, failure, response, spider):
+        print("CAUGHT IN ERROR")
