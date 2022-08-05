@@ -6,7 +6,7 @@ import logging
 def run_scrapy(argv, settings):
     from scrapy import spiderloader
     from scrapy.crawler import CrawlerProcess
-    from scrapy.project.utils import get_project_settings
+    from scrapy.utils.project import get_project_settings
 
     spider_loader = spiderloader.SpiderLoaders.from_settings()
     print(f"SCRAPING SPIDER {argv[2]}")
