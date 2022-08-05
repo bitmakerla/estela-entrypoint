@@ -11,7 +11,7 @@ def run_scrapy(argv, settings, describe):
         execute(settings=settings)
     else:
         from scrapy import spiderloader
-        from scrapy.crawler import CrawlerProcess
+        from scrapy.crawler import Crawler, CrawlerProcess
 
         spider_loader = spiderloader.SpiderLoader.from_settings(settings)
         print(f"SCRAPING SPIDER {argv[2]}")
@@ -20,8 +20,8 @@ def run_scrapy(argv, settings, describe):
         spider = spider_class()
         print(f"SPIDER {spider}")
 
-        crawler_process = CrawlerProcess(settings=settings)
-        crawler_process.crawl(argv[2])
+        crawler_process = CrawlerProcess(settings)
+        crawler_process.crawl(spider_class)
         crawler_process.start()
 
 

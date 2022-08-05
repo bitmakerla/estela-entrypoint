@@ -51,13 +51,13 @@ class ItemStorageExtension:
             },
             headers={"Authorization": "Token {}".format(self.auth_token)},
         )
+        crawler.signals.connect(ext.item_scraped, signals.item_scraped)
+        crawler.signals.connect(ext.spider_opened, signals.spider_opened)
+        crawler.signals.connect(ext.spider_closed, signals.spider_closed)
 
     @classmethod
     def from_crawler(cls, crawler):
         ext = cls(crawler.stats)
-        crawler.signals.connect(ext.item_scraped, signals.item_scraped)
-        crawler.signals.connect(ext.spider_opened, signals.spider_opened)
-        crawler.signals.connect(ext.spider_closed, signals.spider_closed)
         return ext
 
     def item_scraped(self, item):
