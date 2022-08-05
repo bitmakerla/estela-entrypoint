@@ -17,12 +17,12 @@ def run_scrapy(argv, settings, describe):
         settings = get_project_settings()
         spider_loader = spiderloader.SpiderLoader.from_settings(settings)
         print(f"SCRAPING SPIDER {argv[2]}")
-        spider_class = spider_loader.load(argv[2])
-        print(f"SPIDER CLASS {spider_class}")
+        spider = spider_loader.load(argv[2])()
+        print(f"SPIDER {spider}")
 
         crawler_process = CrawlerProcess(settings)
         crawler = crawler_process.create_crawler(crawler_process)
-        crawler.crawl(spider_class)
+        crawler.crawl(spider)
         crawler_process.start()
 
 
