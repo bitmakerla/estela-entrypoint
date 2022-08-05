@@ -4,11 +4,24 @@ import logging
 
 
 def run_scrapy(argv, settings):
-    from scrapy.cmdline import execute
+    from scrapy import spiderloader
+    from scrapy.crawler import CrawlerProcess
+    from scrapy.project.utils import get_project_settings
 
+    spider_loader = spiderloader.SpiderLoaders.from_settings()
+    print(f"SCRAPING SPIDER {argv[2]}")
+    spider_class = spider_loader.load(argv[2])
+    settings = get_project_settings()
+
+    crawler_process = CrawlerProcess(settings)
+    crawler = crawler_process.create_crawler()
+    crawler.crawl(spider_class)
+    crawler_process.start()
+
+    #  from scrapy.cmdline import execute
     # an intermediate function might be needed for other commands [!] missing
-    sys.argv = argv
-    execute(settings=settings)
+    #  sys.argv = argv
+    #  execute(settings=settings)
 
 
 def run_code(args, commands_module=None):
