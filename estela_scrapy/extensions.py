@@ -1,6 +1,6 @@
 import json
 import os
-from signal import signal
+import signal
 from datetime import datetime, timedelta
 
 import requests
