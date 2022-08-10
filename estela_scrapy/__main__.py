@@ -10,15 +10,23 @@ logger = logging.getLogger(__name__)
 
 
 class MyCP(CrawlerProcess):
+    def _signal_shutdown(self, signum, _):
+        from twisted.internet import reactor
+        install_shutdown_handlers(lambda _: pass)  # do not allow killing the job
+        signame = signal_names[signum]
+        logger.info("Received %(signame)s, shutting down gracefully. Send again to force ",
+                    {'signame': signame})
+        reactor.callFromThread(self._graceful_stop_reactor)
+
     def _print_whatevs(self):
         logger.info("PLEASE WORK HERE")
         logger.info(f"CRAWLERS {list(self.crawlers)}")
         logger.info("STATS", list(self.crawlers)[0].stats.get_stats())
+        #  d.addBoth(self._stop_reactor)
 
     def _graceful_stop_reactor(self):
         d = self.stop()
         d.addBoth(self._print_whatevs)
-        d.addBoth(self._stop_reactor)
         return d
 
     #  def _signal_shutdown(self, signum, _):
