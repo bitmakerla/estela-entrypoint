@@ -37,13 +37,13 @@ class MyCP(CrawlerProcess):
             d.addBoth(self._stop_reactor)
 
         if install_signal_handlers:
-            install_shutdown_handlers(self._signal_shutdown)
+            #  install_shutdown_handlers(self._signal_shutdown)
+            install_shutdown_handlers(self.print_whatevs)
         resolver_class = load_object(self.settings["DNS_RESOLVER"])
         resolver = create_instance(resolver_class, self.settings, self, reactor=reactor)
         resolver.install_on_reactor()
         tp = reactor.getThreadPool()
         tp.adjustPoolsize(maxthreads=self.settings.getint("REACTOR_THREADPOOL_MAXSIZE"))
-        reactor.addSystemEventTrigger("after", "shutdown", self.print_whatevs)
         reactor.addSystemEventTrigger("before", "shutdown", self.stop)
         reactor.run(installSignalHandlers=False)  # blocking call
 
