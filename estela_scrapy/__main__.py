@@ -21,8 +21,17 @@ logger = logging.getLogger(__name__)
         #  )
         #  reactor.callFromThread(self._graceful_stop_reactor)
 
-def print_whatevs():
+def print_data(crawler_process):
+    logger.info("MADE IT 2 HAHAHA")
+    logger.info(f"CRAWLERS {crawler_process.crawlers}")
+    logger.info("STATS", crawler_process.crawlers[0].stats.get_stats())
+
+
+def print_whatevs(crawler_process):
     logger.info("MADE IT HAHAHA")
+    d = crawler_process._graceful_stop_reactor()
+    d.addBoth(print_data, crawler_process)
+    return d
 
 
 def run_scrapy(argv, settings, describe):
@@ -55,11 +64,8 @@ def run_scrapy(argv, settings, describe):
         #  crawler_process.crawl()
         crawler_process.crawl(argv[2])
         #  crawler_process.signals.connect(print_whatevs, signal.SIGUSR1)
-        signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(print_whatevs))
+        signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(print_whatevs, crawler_process))
         crawler_process.start()
-
-        print(f"CRAWLERS {crawler_process.crawlers}")
-        print("STATS", crawler_process.crawlers[0].stats.get_stats())
 
 
 def run_code(args, commands_module=None, describe=False):
