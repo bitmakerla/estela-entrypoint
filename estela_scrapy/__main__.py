@@ -3,9 +3,14 @@ import sys
 import logging
 
 
+def print_whatevs():
+    print("MADE IT HERE")
+
+
 def run_scrapy(argv, settings, describe):
     if describe:
         from scrapy.cmdline import execute
+
         #  an intermediate function might be needed for other commands [!] missing
         sys.argv = argv
         execute(settings=settings)
@@ -22,6 +27,7 @@ def run_scrapy(argv, settings, describe):
 
         crawler_process = CrawlerProcess(settings)
         crawler_process.crawl(argv[2])
+        crawler.signals.connect(print_whatevs, signal.SIGUSR1)
         crawler_process.start()
 
         print(f"CRAWLERS {crawler_process.crawlers}")
@@ -52,7 +58,11 @@ def describe_project():
 
     setup_scrapy_conf()
 
-    run_code(["scrapy", "describe_project"] + sys.argv[1:], "estela_scrapy.commands", describe=True)
+    run_code(
+        ["scrapy", "describe_project"] + sys.argv[1:],
+        "estela_scrapy.commands",
+        describe=True,
+    )
 
 
 def setup_and_launch():
