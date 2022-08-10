@@ -20,6 +20,7 @@ class MyCP(CrawlerProcess):
         reactor.callFromThread(self._graceful_stop_reactor)
 
     def _save_stats(self):
+        logger.info("KKK2")
         auth_token = os.getenv("ESTELA_AUTH_TOKEN")
         spider_stats = list(crawler_process.crawlers)[0].stats.get_stats()
         lifespan=spider_stats.get("elapsed_time_seconds", 0),
@@ -45,6 +46,7 @@ class MyCP(CrawlerProcess):
         )
 
     def _graceful_stop_reactor(self):
+        logger.info("KKK")
         d = self.stop()
         d.addBoth(self._save_stats)
         d.addBoth(self._stop_reactor)
