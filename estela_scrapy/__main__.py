@@ -55,7 +55,7 @@ def run_scrapy(argv, settings, describe):
         #  crawler_process.crawl()
         crawler_process.crawl(argv[2])
         #  crawler_process.signals.connect(print_whatevs, signal.SIGUSR1)
-        signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(self.on_SIGUSR1))
+        signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(print_whatevs))
         crawler_process.start()
 
         print(f"CRAWLERS {crawler_process.crawlers}")
