@@ -1,4 +1,5 @@
 import os
+import requests
 import signal
 import sys
 import logging
@@ -18,15 +19,35 @@ class MyCP(CrawlerProcess):
                     {'signame': signame})
         reactor.callFromThread(self._graceful_stop_reactor)
 
-    def _print_whatevs(self):
-        logger.info("PLEASE WORK HERE")
-        logger.info(f"CRAWLERS {list(self.crawlers)}")
-        logger.info("STATS", list(self.crawlers)[0].stats.get_stats())
-        #  d.addBoth(self._stop_reactor)
+    def _save_stats(self):
+        auth_token = os.getenv("ESTELA_AUTH_TOKEN")
+        spider_stats = list(crawler_process.crawlers)[0].stats.get_stats()
+        lifespan=spider_stats.get("elapsed_time_seconds", 0),
+        total_bytes=spider_stats.get("downloader/response_bytes", 0),
+        item_count=spider_stats.get("item_scraped_count", 0),
+        request_count=spider_stats.get("downloader/request_count", 0),
+        requests.patch(
+            self.job_url,
+            #  data={
+                #  "status": status,
+                #  "lifespan": lifespan,
+                #  "total_response_bytes": total_bytes,
+                #  "item_count": item_count,
+                #  "request_count": request_count,
+            #  },
+            data={
+                "lifespan": lifespan,
+                "total_response_bytes": total_bytes,
+                "item_count": item_count,
+                "request_count": request_count,
+            },
+            headers={"Authorization": "Token {}".format(auth_token)},
+        )
 
     def _graceful_stop_reactor(self):
         d = self.stop()
-        d.addBoth(self._print_whatevs)
+        d.addBoth(self._save_stats)
+        d.addBoth(self._stop_reactor)
         return d
 
     #  def _signal_shutdown(self, signum, _):
