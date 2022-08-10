@@ -3,6 +3,8 @@ import signal
 import sys
 import logging
 from scrapy.crawler import CrawlerProcess
+from scrapy.utils.ossignal import install_shutdown_handlers
+from scrapy.utils.misc import create_instance, load_object
 
 
 class MyCP(CrawlerProcess):
