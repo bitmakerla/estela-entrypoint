@@ -6,10 +6,11 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.ossignal import install_shutdown_handlers
 from scrapy.utils.misc import create_instance, load_object
 
+logger = logging.getLogger(__name__)
 
 class MyCP(CrawlerProcess):
     def print_whatevs():
-        print("MADE IT HERE")
+        logger.info("MADE IT HERE")
 
     def start(self, stop_after_crawl=True, install_signal_handlers=True):
         """
