@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def print_data(crawler_process):
     logger.info("MADE IT 3")
     logger.info(f"CRAWLERS {crawler_process.crawlers}")
-    logger.info("STATS", crawler_process.crawlers[0].stats.get_stats())
+    logger.info("STATS", list(crawler_process.crawlers)[0].stats.get_stats())
 
 
 def print_whatevs(crawler_process):
