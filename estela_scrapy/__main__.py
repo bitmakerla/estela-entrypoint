@@ -29,7 +29,7 @@ def print_data(crawler_process):
 
 def print_whatevs(crawler_process):
     logger.info("MADE IT HAHAHA")
-    d = crawler_process._graceful_stop_reactor()
+    d = crawler_process.stop()
     d.addBoth(print_data, crawler_process)
     return d
 
