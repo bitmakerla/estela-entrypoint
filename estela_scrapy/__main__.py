@@ -30,7 +30,8 @@ def print_data(crawler_process):
 def print_whatevs(crawler_process):
     logger.info("MADE IT HAHAHA")
     crawler_process.stop()
-    crawler_process.join()
+    while crawler_process._active:
+        pass
     logger.info("MADE IT 2")
     print_data(crawler_process)
 
