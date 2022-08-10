@@ -22,18 +22,18 @@ logger = logging.getLogger(__name__)
         #  reactor.callFromThread(self._graceful_stop_reactor)
 
 def print_data(crawler_process):
-    logger.info("MADE IT 3")
+    logger.info("MADE IT 2")
     logger.info(f"CRAWLERS {crawler_process.crawlers}")
     logger.info("STATS", list(crawler_process.crawlers)[0].stats.get_stats())
 
 
 def print_whatevs(crawler_process):
     logger.info("MADE IT HAHAHA")
-    crawler_process.stop()
-    while crawler_process._active:
-        pass
-    logger.info("MADE IT 2")
-    print_data(crawler_process)
+    d = crawler_process.stop()
+    d.addBoth(print_data, crawler_process)
+    return d
+    #  logger.info("MADE IT 2")
+    #  print_data(crawler_process)
 
 
 def run_scrapy(argv, settings, describe):
