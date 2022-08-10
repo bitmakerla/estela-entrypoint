@@ -30,6 +30,7 @@ def run_scrapy(argv, settings, describe):
         crawler = crawler_process.create_crawler(spider_class)
         crawler.signals.connect(print_whatevs, signal.SIGUSR1)
         crawler.crawl()
+        crawler_process.join()
         #  crawler_process.crawl()
         #  crawler_process.crawl(argv[2])
         #  crawler_process.signals.connect(print_whatevs, signal.SIGUSR1)
