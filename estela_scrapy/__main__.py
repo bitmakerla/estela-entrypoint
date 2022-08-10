@@ -64,7 +64,7 @@ def run_scrapy(argv, settings, describe):
         spider = spider_class()
         print(f"SPIDER {spider}")
 
-        crawler_process = CrawlerProcess(settings)
+        crawler_process = MyCP(settings)
         #  crawler = crawler_process.create_crawler(spider_class)
         #  crawler.signals.connect(print_whatevs, signal.SIGUSR1)
         #  crawler.crawl()
