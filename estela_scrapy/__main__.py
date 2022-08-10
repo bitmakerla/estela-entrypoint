@@ -3,14 +3,19 @@ import signal
 import sys
 import logging
 from scrapy.crawler import CrawlerProcess
-from scrapy.utils.ossignal import install_shutdown_handlers
+from scrapy.utils.ossignal import install_shutdown_handlers, signal_names
 from scrapy.utils.misc import create_instance, load_object
 
 logger = logging.getLogger(__name__)
 
 class MyCP(CrawlerProcess):
-    def print_whatevs():
+    def print_whatevs(self, signum, _):
         logger.info("MADE IT HERE")
+        from twisted.internet import reactor
+        install_shutdown_handlers(self._signal_kill)
+        signame = signal_names[signum]
+        logger.info("Received %(signame)s, shutting down gracefully. Send again to force ",
+                    {'signame': signame})
 
     def start(self, stop_after_crawl=True, install_signal_handlers=True):
         """
