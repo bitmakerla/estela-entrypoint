@@ -27,7 +27,7 @@ def run_scrapy(argv, settings, describe):
 
         crawler_process = CrawlerProcess(settings)
         crawler_process.crawl(argv[2])
-        crawler.signals.connect(print_whatevs, signal.SIGUSR1)
+        crawler_process.signals.connect(print_whatevs, signal.SIGUSR1)
         crawler_process.start()
 
         print(f"CRAWLERS {crawler_process.crawlers}")
