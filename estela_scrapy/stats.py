@@ -7,10 +7,12 @@ logger = logging.getLogger(__name__)
 
 
 class EstelaStatsCollector(StatsCollector):
-    def close_spider(self, spider, reason):
-        super(EstelaStatsCollector, self).close_spider(spider, reason)
+    def __init__(self, crawler):
+        super().__init__(crawler)
 
-        spider_stats = self.crawler.stats.get_stats()
+    def _upload_stats(self):
+        #  spider_stats = self.crawler.stats.get_stats()
+        spider_stats = self._stats
         lifespan=spider_stats.get("elapsed_time_seconds", 0),
         total_bytes=spider_stats.get("downloader/response_bytes", 0),
         item_count=spider_stats.get("item_scraped_count", 0),
@@ -41,3 +43,8 @@ class EstelaStatsCollector(StatsCollector):
         #  }
         #  self.producer.send("job_logs", value=data).add_errback(on_kafka_send_error)
         #  self.producer.flush()
+
+    def close_spider(self, spider, reason):
+        super(EstelaStatsCollector, self).close_spider(spider, reason)
+        self._upload_stats()
+
