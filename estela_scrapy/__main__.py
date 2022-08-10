@@ -9,7 +9,18 @@ from scrapy.utils.misc import create_instance, load_object
 logger = logging.getLogger(__name__)
 
 
-#  class MyCP(CrawlerProcess):
+class MyCP(CrawlerProcess):
+    def _print_whatevs(self):
+        logger.info("PLEASE WORK HERE")
+        logger.info(f"CRAWLERS {list(self.crawlers)}")
+        logger.info("STATS", list(self.crawlers)[0].stats.get_stats())
+
+    def _graceful_stop_reactor(self):
+        d = self.stop()
+        d.addBoth(self._print_whatevs)
+        d.addBoth(self._stop_reactor)
+        return d
+
     #  def _signal_shutdown(self, signum, _):
         #  from twisted.internet import reactor
 #
@@ -23,15 +34,16 @@ logger = logging.getLogger(__name__)
 
 def print_data(crawler_process):
     logger.info("MADE IT 2")
-    logger.info(f"CRAWLERS {crawler_process.crawlers}")
+    logger.info(f"CRAWLERS {list(crawler_process.crawlers)}")
     logger.info("STATS", list(crawler_process.crawlers)[0].stats.get_stats())
 
 
 def print_whatevs(crawler_process):
-    logger.info("MADE IT HAHAHA")
-    d = crawler_process.stop()
-    d.addBoth(print_data, crawler_process)
-    return d
+    d = crawler_process
+    #  logger.info("MADE IT HAHAHA")
+    #  d = crawler_process.stop()
+    #  d.addBoth(print_data, crawler_process)
+    #  return d
     #  logger.info("MADE IT 2")
     #  print_data(crawler_process)
 
@@ -55,7 +67,7 @@ def run_scrapy(argv, settings, describe):
         spider = spider_class()
         print(f"SPIDER {spider}")
 
-        crawler_process = CrawlerProcess(settings)
+        #  crawler_process = CrawlerProcess(settings)
         #  crawler = crawler_process.create_crawler(spider_class)
         #  crawler.signals.connect(print_whatevs, signal.SIGUSR1)
         #  crawler.crawl()
@@ -63,11 +75,13 @@ def run_scrapy(argv, settings, describe):
         #  if not d.called:
         #  d.addBoth(crawler_process._stop_reactor)
 
-        #  crawler_process.crawl()
+        #  crawler_process.crawl(argv[2])
+        #  signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(print_whatevs, crawler_process))
+        #  crawler_process.start(stop_after_crawl=False)
+
+        crawler_process = MyCP(settings)
         crawler_process.crawl(argv[2])
-        #  crawler_process.signals.connect(print_whatevs, signal.SIGUSR1)
-        signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(print_whatevs, crawler_process))
-        crawler_process.start(stop_after_crawl=False)
+        crawler_process.start()
 
 
 def run_code(args, commands_module=None, describe=False):
