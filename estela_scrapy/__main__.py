@@ -43,7 +43,7 @@ class MyCP(CrawlerProcess):
         resolver.install_on_reactor()
         tp = reactor.getThreadPool()
         tp.adjustPoolsize(maxthreads=self.settings.getint("REACTOR_THREADPOOL_MAXSIZE"))
-        reactor.addSystemEventTrigger("before", "shutdown", self.print_whatevs)
+        reactor.addSystemEventTrigger("after", "shutdown", self.print_whatevs)
         reactor.addSystemEventTrigger("before", "shutdown", self.stop)
         reactor.run(installSignalHandlers=False)  # blocking call
 
