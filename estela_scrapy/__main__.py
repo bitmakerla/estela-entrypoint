@@ -8,49 +8,21 @@ from scrapy.utils.misc import create_instance, load_object
 
 logger = logging.getLogger(__name__)
 
-class MyCP(CrawlerProcess):
-    def print_whatevs(self, signum, _):
-        logger.info("MADE IT HERE")
-        from twisted.internet import reactor
-        install_shutdown_handlers(self._signal_kill)
-        signame = signal_names[signum]
-        logger.info("Received %(signame)s, shutting down gracefully. Send again to force ",
-                    {'signame': signame})
 
-    def start(self, stop_after_crawl=True, install_signal_handlers=True):
-        """
-        This method starts a :mod:`~twisted.internet.reactor`, adjusts its pool
-        size to :setting:`REACTOR_THREADPOOL_MAXSIZE`, and installs a DNS cache
-        based on :setting:`DNSCACHE_ENABLED` and :setting:`DNSCACHE_SIZE`.
+#  class MyCP(CrawlerProcess):
+    #  def _signal_shutdown(self, signum, _):
+        #  from twisted.internet import reactor
+#
+        #  install_shutdown_handlers(self._signal_kill)
+        #  signame = signal_names[signum]
+        #  logger.info(
+            #  "Received %(signame)s, shutting down gracefully. Send again to force ",
+            #  {"signame": signame},
+        #  )
+        #  reactor.callFromThread(self._graceful_stop_reactor)
 
-        If ``stop_after_crawl`` is True, the reactor will be stopped after all
-        crawlers have finished, using :meth:`join`.
-
-        :param bool stop_after_crawl: stop or not the reactor when all
-            crawlers have finished
-
-        :param bool install_signal_handlers: whether to install the shutdown
-            handlers (default: True)
-        """
-        from twisted.internet import reactor
-
-        if stop_after_crawl:
-            d = self.join()
-            # Don't start the reactor if the deferreds are already fired
-            if d.called:
-                return
-            d.addBoth(self._stop_reactor)
-
-        if install_signal_handlers:
-            #  install_shutdown_handlers(self._signal_shutdown)
-            install_shutdown_handlers(self.print_whatevs)
-        resolver_class = load_object(self.settings["DNS_RESOLVER"])
-        resolver = create_instance(resolver_class, self.settings, self, reactor=reactor)
-        resolver.install_on_reactor()
-        tp = reactor.getThreadPool()
-        tp.adjustPoolsize(maxthreads=self.settings.getint("REACTOR_THREADPOOL_MAXSIZE"))
-        reactor.addSystemEventTrigger("before", "shutdown", self.stop)
-        reactor.run(installSignalHandlers=False)  # blocking call
+def print_whatevs():
+    logger.info("MADE IT HAHAHA")
 
 
 def run_scrapy(argv, settings, describe):
@@ -72,7 +44,7 @@ def run_scrapy(argv, settings, describe):
         spider = spider_class()
         print(f"SPIDER {spider}")
 
-        crawler_process = MyCP(settings)
+        crawler_process = CrawlerProcess(settings)
         #  crawler = crawler_process.create_crawler(spider_class)
         #  crawler.signals.connect(print_whatevs, signal.SIGUSR1)
         #  crawler.crawl()
@@ -83,6 +55,7 @@ def run_scrapy(argv, settings, describe):
         #  crawler_process.crawl()
         crawler_process.crawl(argv[2])
         #  crawler_process.signals.connect(print_whatevs, signal.SIGUSR1)
+        signal.signal(signal.SIGUSR1, lambda signum, frame: reactor.callFromThread(self.on_SIGUSR1))
         crawler_process.start()
 
         print(f"CRAWLERS {crawler_process.crawlers}")
