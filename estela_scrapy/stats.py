@@ -9,11 +9,8 @@ logger = logging.getLogger(__name__)
 class EstelaStatsCollector(StatsCollector):
     def close_spider(self, spider, reason):
         super(EstelaStatsCollector, self).close_spider(spider, reason)
-        logger.info("STATS")
-        logger.info(self.get_stats())
 
-        print("I'M CLOSING HERE")
-        spider_stats = spider.crawler.stats.get_stats()
+        spider_stats = self.crawler.stats.get_stats()
         lifespan=spider_stats.get("elapsed_time_seconds", 0),
         total_bytes=spider_stats.get("downloader/response_bytes", 0),
         item_count=spider_stats.get("item_scraped_count", 0),
