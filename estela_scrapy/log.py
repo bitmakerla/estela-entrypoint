@@ -5,9 +5,6 @@ import warnings
 from twisted.python import log as txlog
 from scrapy import __version__
 
-from sh_scrapy.compat import to_native_str
-from sh_scrapy.writer import pipe_writer
-
 
 # keep a global reference to stderr as it is redirected on log initialization
 _stdout = sys.stdout
@@ -17,11 +14,13 @@ _stderr = sys.stderr
 def _logfn(level, message):
     """Wraps HS job logging function."""
     try:
-        pipe_writer.write_log(level=level, message=message)
+        print("INTERESTING")
+        #pipe_writer.write_log(level=level, message=message)
     except UnicodeDecodeError:
         # workaround for messages that contain binary data
         message = repr(message)[1:-1]
-        pipe_writer.write_log(level=level, message=message)
+        print("INTERESTING 2")
+        #pipe_writer.write_log(level=level, message=message)
 
 
 def initialize_logging():
@@ -118,7 +117,8 @@ class HubstorageLogObserver(object):
 
         msg = ev.get('message')
         if msg:
-            msg = to_native_str(msg[0])
+            msg = "MESSAGE"
+            #msg = to_native_str(msg[0])
 
         failure = ev.get('failure', None)
         if failure:
@@ -154,7 +154,8 @@ class StdoutLogger(txlog.StdioOnnaStick):
         _logfn(message=self.prefix + msg, level=self.loglevel)
 
     def write(self, data):
-        data = to_native_str(data, self.encoding)
+        data = ["line1","line2"]
+        #data = to_native_str(data, self.encoding)
 
         d = (self.buf + data).split('\n')
         self.buf = d[-1]
@@ -164,5 +165,6 @@ class StdoutLogger(txlog.StdioOnnaStick):
 
     def writelines(self, lines):
         for line in lines:
-            line = to_native_str(line, self.encoding)
+            print(line)
+            #line = to_native_str(line, self.encoding)
             self._logprefixed(line)
