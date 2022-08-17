@@ -37,7 +37,7 @@ def describe_project():
 
     setup_scrapy_conf()
 
-    run_code(["scrapy", "describe_project"] + sys.argv[1:], "estela_scrapy.commands")
+    run_code(["scrapy", "describe_project"] + sys.argv[1:], commands_module="estela_scrapy.commands")
 
 
 def setup_and_launch():
@@ -50,9 +50,9 @@ def setup_and_launch():
 
         os.environ.update(env)
         setup_scrapy_conf()
-        # init logger [!] missing
-        from estela_scrapy.log import initialize_logging
-        loghdlr = initialize_logging()
+
+        from estela_scrapy.log import init_logging
+        loghdlr = init_logging()
     except:
         logging.exception("Environment variables were not defined properly")
         raise

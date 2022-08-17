@@ -12,3 +12,11 @@ def datetime_to_json(o):
     if isinstance(o, datetime):
         return o.__str__()
     raise TypeError("Type %s not serializable" % type(o))
+
+
+def to_standar_str(text, encoding="utf-8", errors='strict'):
+    if isinstance(text, str):
+        return text
+    if not isinstance(text, bytes):
+        raise TypeError("Unable to standardize {} type".format(type(text).__name__))
+    return text.decode(encoding, errors)

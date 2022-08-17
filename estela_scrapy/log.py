@@ -1,78 +1,71 @@
 import logging
 import sys
+import os
 import warnings
+import time
 
 from twisted.python import log as txlog
 from scrapy import __version__
+from estela_scrapy.utils import to_standar_str
+from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
 
-
-# keep a global reference to stderr as it is redirected on log initialization
-_stdout = sys.stdout
 _stderr = sys.stderr
 
 
-def _logfn(level, message):
-    """Wraps HS job logging function."""
-    try:
-        print("INTERESTING")
-        #pipe_writer.write_log(level=level, message=message)
-    except UnicodeDecodeError:
-        # workaround for messages that contain binary data
-        message = repr(message)[1:-1]
-        print("INTERESTING 2")
-        #pipe_writer.write_log(level=level, message=message)
+def _logfn(level, message, parent="none"):
+    producer = connect_kafka_producer()
+    data = {
+        "jid": os.getenv("ESTELA_SPIDER_JOB"),
+        "payload": {
+            "log": str(message),
+            "datetime": float(time.time())
+        }
+    }
+    response = producer.send("job_logs", value=data)
 
 
-def initialize_logging():
-    """Initialize logging to send messages to Hubstorage job logs
-    it initializes:
-    - Python logging
-    - Twisted logging
-    - Scrapy logging
-    - Redirects standard output and stderr to job log at INFO level
-    This duplicates some code with Scrapy log.start(), but it's required in
-    order to avoid scrapy from starting the log twice.
-    """
+def init_logging():
     # General python logging
     root = logging.getLogger()
-    root.setLevel(logging.NOTSET)
-    hdlr = HubstorageLogHandler()
+    root.setLevel(logging.NOTSET) # NOSET Make processing all messages if is set in root
+    
+    hdlr = LogHandler()
     hdlr.setLevel(logging.INFO)
     hdlr.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
     root.addHandler(hdlr)
 
     # Silence commonly used noisy libraries
     try:
-        import boto  # boto overrides its logger at import time
+        import boto
     except ImportError:
         pass
 
     nh = logging.NullHandler()
-    for ln in ('boto', 'requests', 'hubstorage'):
+    for ln in ('boto', 'requests', 'kafka.conn'):
         lg = logging.getLogger(ln)
         lg.propagate = 0
         lg.addHandler(nh)
 
-    # Redirect standard output and error to HS log
-    sys.stdout = StdoutLogger(0, 'utf-8')
-    sys.stderr = StdoutLogger(1, 'utf-8')
+    # Redirect standard output and error
+    sys.stdout = StdoutLogger(False, 'utf-8')
+    sys.stderr = StdoutLogger(True, 'utf-8')
 
     # Twisted specifics (includes Scrapy)
-    obs = HubstorageLogObserver(hdlr)
+    obs = LogObserver(hdlr)
     _oldshowwarning = warnings.showwarning
     txlog.startLoggingWithObserver(obs.emit, setStdout=False)
     warnings.showwarning = _oldshowwarning
     return hdlr
 
 
-class HubstorageLogHandler(logging.Handler):
-    """Python logging handler that writes to HubStorage"""
+class LogHandler(logging.Handler):
+    """Python logging handler"""
 
     def emit(self, record):
         try:
             message = self.format(record)
             if message:
-                _logfn(message=message, level=record.levelno)
+                _logfn(message=message, level=record.levelno, parent="LogHandler")
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -82,13 +75,13 @@ class HubstorageLogHandler(logging.Handler):
         cur = sys.stderr
         try:
             sys.stderr = _stderr
-            super(HubstorageLogHandler, self).handleError(record)
+            super(LogHandler, self).handleError(record)
         finally:
             sys.stderr = cur
 
 
-class HubstorageLogObserver(object):
-    """Twisted log observer with Scrapy specifics that writes to HubStorage"""
+class LogObserver(object):
+    """Twisted log observer"""
 
     def __init__(self, loghdlr):
         self._hs_loghdlr = loghdlr
@@ -96,12 +89,10 @@ class HubstorageLogObserver(object):
     def emit(self, ev):
         logitem = self._get_log_item(ev)
         if logitem:
-            _logfn(**logitem)
+            _logfn(**logitem,parent="LogObserver")
 
     def _get_log_item(self, ev):
-        """Get HubStorage log item for the given Twisted event, or None if no
-        document should be inserted
-        """
+        """Get logs from scrapy in his level or Info level in other case"""
         if ev['system'] == 'scrapy':
             level = ev['logLevel']
         else:
@@ -110,15 +101,13 @@ class HubstorageLogObserver(object):
             else:
                 level = logging.INFO
 
-        # It's important to access level trough handler instance,
-        # min log level can change at any moment.
+        # Ignore levels
         if level < self._hs_loghdlr.level:
             return
 
         msg = ev.get('message')
         if msg:
-            msg = "MESSAGE"
-            #msg = to_native_str(msg[0])
+            msg = to_standar_str(msg[0])
 
         failure = ev.get('failure', None)
         if failure:
@@ -133,29 +122,25 @@ class HubstorageLogObserver(object):
             try:
                 msg = fmt % ev
             except:
-                msg = "UNABLE TO FORMAT LOG MESSAGE: fmt=%r ev=%r" % (fmt, ev)
+                msg = "FAILED TO APPLY FORMAT: fmt=%r ev=%r" % (fmt, ev)
                 level = logging.ERROR
-        # to replicate typical scrapy log appeareance
+
         msg = msg.replace('\n', '\n\t')
         return {'message': msg, 'level': level}
 
 
 class StdoutLogger(txlog.StdioOnnaStick):
-    """This works like Twisted's StdioOnnaStick but prepends standard
-    output/error messages with [stdout] and [stderr]
-    """
-
-    def __init__(self, isError=0, encoding=None, loglevel=logging.INFO):
+    """Catch logs from sterr and stdout"""
+    def __init__(self, isError=False, encoding=None, loglevel=logging.INFO):
         txlog.StdioOnnaStick.__init__(self, isError, encoding)
         self.prefix = "[stderr] " if isError else "[stdout] "
         self.loglevel = loglevel
 
     def _logprefixed(self, msg):
-        _logfn(message=self.prefix + msg, level=self.loglevel)
+        _logfn(message=self.prefix + msg, level=self.loglevel, parent="StdoutLogger")
 
     def write(self, data):
-        data = ["line1","line2"]
-        #data = to_native_str(data, self.encoding)
+        data = to_standar_str(data, self.encoding)
 
         d = (self.buf + data).split('\n')
         self.buf = d[-1]
@@ -165,6 +150,5 @@ class StdoutLogger(txlog.StdioOnnaStick):
 
     def writelines(self, lines):
         for line in lines:
-            print(line)
-            #line = to_native_str(line, self.encoding)
+            line = to_standar_str(line, self.encoding)
             self._logprefixed(line)
