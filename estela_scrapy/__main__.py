@@ -20,7 +20,7 @@ def run_code(args, log_handler=None, commands_module=None):
         if commands_module:
             settings.set("COMMANDS_MODULE", commands_module, priority="cmdline")
         if log_handler is not None:
-            log_handler.setLevel(settings['LOG_LEVEL'])
+            log_handler.setLevel(settings["LOG_LEVEL"])
     except Exception:
         logging.exception("Settings initialization failed")
         raise
@@ -37,7 +37,10 @@ def describe_project():
 
     setup_scrapy_conf()
 
-    run_code(["scrapy", "describe_project"] + sys.argv[1:], commands_module="estela_scrapy.commands")
+    run_code(
+        ["scrapy", "describe_project"] + sys.argv[1:],
+        commands_module="estela_scrapy.commands",
+    )
 
 
 def setup_and_launch():
@@ -52,6 +55,7 @@ def setup_and_launch():
         setup_scrapy_conf()
 
         from estela_scrapy.log import init_logging
+
         loghdlr = init_logging()
     except:
         logging.exception("Environment variables were not defined properly")
