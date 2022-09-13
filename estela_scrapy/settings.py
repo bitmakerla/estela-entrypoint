@@ -38,6 +38,7 @@ def load_default_settings(settings):
     # memory_limit [!] missing
     # set other default settings with max priority
     settings.setdict({"LOG_LEVEL": "INFO"}, priority="cmdline")
+    settings.setdict({"LOG_ENABLED": False}, priority="cmdline")
 
 
 def populate_settings():
