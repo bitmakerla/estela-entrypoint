@@ -79,7 +79,7 @@ class ItemStorageExtension:
             request_count=spider_stats.get("downloader/request_count", 0),
         )
 
-        parser_stats = json.dumps(spider_stats, default=datetime_to_json)
+        parser_stats = json.dumps(spider_stats, default=str)
         data = {
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
