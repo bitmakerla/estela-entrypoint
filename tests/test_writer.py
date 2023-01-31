@@ -1,9 +1,10 @@
 import json
 import os
-import pytest
 import threading
-
 from queue import Queue
+
+import pytest
+
 from estela_scrapy.writer import PipeWriter
 
 

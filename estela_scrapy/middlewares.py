@@ -1,8 +1,9 @@
 import os
 
-from estela_scrapy.utils import parse_time
-from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
 from scrapy.utils.request import request_fingerprint
+
+from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
+from estela_scrapy.utils import parse_time
 
 
 class StorageDownloaderMiddleware:

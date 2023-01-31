@@ -1,10 +1,12 @@
 import os
 from unittest import mock
 
-from estela_scrapy.env import decode_job
-from estela_scrapy.env import get_api_args
-from estela_scrapy.env import get_args_and_env
-from estela_scrapy.env import setup_scrapy_conf
+from estela_scrapy.env import (
+    decode_job,
+    get_api_args,
+    get_args_and_env,
+    setup_scrapy_conf,
+)
 
 
 @mock.patch.dict(os.environ, {"JOB_INFO": '{"key": "value"}'})

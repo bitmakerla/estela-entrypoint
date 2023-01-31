@@ -1,13 +1,14 @@
 import logging
-import sys
 import os
-import warnings
+import sys
 import time
+import warnings
 
-from twisted.python import log as txlog
 from scrapy import __version__
-from estela_scrapy.utils import to_standar_str
+from twisted.python import log as txlog
+
 from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
+from estela_scrapy.utils import to_standar_str
 
 _stderr = sys.stderr
 
