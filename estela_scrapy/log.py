@@ -8,7 +8,7 @@ from scrapy import __version__
 from twisted.python import log as txlog
 
 from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
-from estela_scrapy.utils import to_standar_str
+from estela_scrapy.utils import to_standard_str
 
 _stderr = sys.stderr
 
@@ -102,7 +102,7 @@ class LogObserver(object):
 
         msg = ev.get("message")
         if msg:
-            msg = to_standar_str(msg[0])
+            msg = to_standard_str(msg[0])
 
         failure = ev.get("failure", None)
         if failure:
@@ -136,7 +136,7 @@ class StdoutLogger(txlog.StdioOnnaStick):
         _logfn(message=self.prefix + msg, level=self.loglevel, parent="StdoutLogger")
 
     def write(self, data):
-        data = to_standar_str(data, self.encoding)
+        data = to_standard_str(data, self.encoding)
 
         d = (self.buf + data).split("\n")
         self.buf = d[-1]
@@ -146,5 +146,5 @@ class StdoutLogger(txlog.StdioOnnaStick):
 
     def writelines(self, lines):
         for line in lines:
-            line = to_standar_str(line, self.encoding)
+            line = to_standard_str(line, self.encoding)
             self._logprefixed(line)
