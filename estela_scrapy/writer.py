@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import threading
 
 from estela_scrapy.utils import parse_time

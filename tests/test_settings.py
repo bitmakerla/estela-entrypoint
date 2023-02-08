@@ -1,9 +1,12 @@
 from unittest import mock
 
 from scrapy.settings import Settings
-from estela_scrapy.settings import update_deprecated_classpaths
-from estela_scrapy.settings import load_default_settings
-from estela_scrapy.settings import populate_settings
+
+from estela_scrapy.settings import (
+    load_default_settings,
+    populate_settings,
+    update_deprecated_classpaths,
+)
 
 
 @mock.patch("estela_scrapy.settings.update_deprecated_classpaths")

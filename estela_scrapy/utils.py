@@ -1,4 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
+
+import requests
 
 
 def parse_time(date=None):
@@ -8,15 +10,39 @@ def parse_time(date=None):
     return parsed_time
 
 
-def datetime_to_json(o):
-    if isinstance(o, datetime):
-        return o.__str__()
-    raise TypeError("Type {} not serializable".format(type(o)))
+def json_serializer(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if hasattr(obj, "__str__"):
+        return str(obj)
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
-def to_standar_str(text, encoding="utf-8", errors="strict"):
+def to_standard_str(text, encoding="utf-8", errors="strict"):
     if isinstance(text, str):
         return text
     if not isinstance(text, bytes):
         raise TypeError("Unable to standardize {} type".format(type(text).__name__))
     return text.decode(encoding, errors)
+
+
+def update_job(
+    job_url,
+    auth_token,
+    status,
+    lifespan=timedelta(seconds=0),
+    total_bytes=0,
+    item_count=0,
+    request_count=0,
+):
+    requests.patch(
+        job_url,
+        data={
+            "status": status,
+            "lifespan": lifespan,
+            "total_response_bytes": total_bytes,
+            "item_count": item_count,
+            "request_count": request_count,
+        },
+        headers={"Authorization": "Token {}".format(auth_token)},
+    )

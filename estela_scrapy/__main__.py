@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 
 
 def run_scrapy(argv, settings):
