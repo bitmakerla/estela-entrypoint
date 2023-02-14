@@ -68,8 +68,6 @@ itemloaders==1.0.4
     # via scrapy
 jmespath==0.10.0
     # via itemloaders
-kafka-python==2.0.2
-    # via -r requirements.in
 lxml==4.6.3
     # via
     #   parsel

@@ -34,8 +34,8 @@ Job specifications are passed through env variables:
   - [Required] _api_host_: API host URL.
   - [Optional] _args_: Dictionary with job arguments.
   - [Required] _collection_: String with name of collection where items will be stored.
-- `KAFKA_ADVERTISED_LISTENERS`: List of advertised hosts in a comma-separated style.
-- `KAFKA_ADVERTISED_PORT`: Default value: _9092_.
+- `QUEUE_PLATFORM`: The queue platform used by estela, review the list of the currently supported platforms.
+- `QUEUE_PLATFORM_{PARAMETERS}`: Please, refer to the `estela-queue-adapter` documentation to declare the needed variables.
 
 ## Testing
 

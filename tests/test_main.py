@@ -2,12 +2,13 @@ import os
 import sys
 from unittest import mock
 
-from estela_scrapy.__main__ import run_scrapy
-from estela_scrapy.__main__ import run_code
-from estela_scrapy.__main__ import describe_project
-from estela_scrapy.__main__ import setup_and_launch
-from estela_scrapy.__main__ import main
-
+from estela_scrapy.__main__ import (
+    describe_project,
+    main,
+    run_code,
+    run_scrapy,
+    setup_and_launch,
+)
 
 JOB_INFO = '{"spider": "sample", "key": "6-6-6", "api_host": "http://estela-api.com", "auth_token": "", "collection": "sj-1-2", "unique": "True"}'
 

@@ -1,14 +1,12 @@
 import os
 
-from estela_scrapy.utils import parse_time
-from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
 from scrapy.utils.request import request_fingerprint
+
+from estela_scrapy.producer import producer
+from estela_scrapy.utils import parse_time
 
 
 class StorageDownloaderMiddleware:
-    def __init__(self):
-        self.producer = connect_kafka_producer()
-
     def process_response(self, request, response, spider):
         data = {
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
@@ -22,6 +20,5 @@ class StorageDownloaderMiddleware:
                 "fingerprint": request_fingerprint(request),
             },
         }
-        self.producer.send("job_requests", value=data).add_errback(on_kafka_send_error)
-        # process parent request [!] missing
+        producer.send("job_requests", data)
         return response

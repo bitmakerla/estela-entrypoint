@@ -1,24 +1,25 @@
 import logging
-import sys
 import os
-import warnings
+import sys
 import time
+import warnings
 
-from twisted.python import log as txlog
+from estela_queue_adapter import queue_noisy_libraries
 from scrapy import __version__
+from twisted.python import log as txlog
+
+from estela_scrapy.producer import producer
 from estela_scrapy.utils import to_standar_str
-from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
 
 _stderr = sys.stderr
 
 
 def _logfn(level, message, parent="none"):
-    producer = connect_kafka_producer()
     data = {
         "jid": os.getenv("ESTELA_SPIDER_JOB"),
         "payload": {"log": str(message), "datetime": float(time.time())},
     }
-    response = producer.send("job_logs", value=data)
+    producer.send("job_logs", data)
 
 
 def init_logging():
@@ -35,7 +36,7 @@ def init_logging():
 
     # Silence commonly used noisy libraries
     nh = logging.NullHandler()
-    for ln in ("boto", "requests", "kafka.conn"):
+    for ln in (["requests"] + queue_noisy_libraries):
         lg = logging.getLogger(ln)
         lg.propagate = 0
         lg.addHandler(nh)

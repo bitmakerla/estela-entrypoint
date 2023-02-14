@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="estela-entrypoint",
@@ -9,7 +9,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         "Scrapy>=1.0",
-        "kafka-python",
         "requests",
     ],
     entry_points={
