@@ -2,15 +2,14 @@ import logging
 import os
 import sys
 
-from scrapy.cmdline import execute
-
-from estela_scrapy.env import decode_job, get_args_and_env, setup_scrapy_conf
+from estela_scrapy.env import decode_job, get_args_and_env
 from estela_scrapy.log import init_logging
-from estela_scrapy.producer import producer
 from estela_scrapy.settings import populate_settings
 
 
 def run_scrapy(argv, settings):
+    from scrapy.cmdline import execute
+
     sys.argv = argv
     execute(settings=settings)
 
@@ -27,13 +26,16 @@ def run_code(args, log_handler=None, commands_module=None):
         raise
     try:
         run_scrapy(args, settings)
-    except Exception:
-        logging.exception("Job runtime exception.")
+    except Exception as ex:
+        logging.exception(f"Job runtime exception: {str(ex)}")
         raise
 
 
 def describe_project():
+    from estela_scrapy.env import setup_scrapy_conf
+
     setup_scrapy_conf()
+
     run_code(
         ["scrapy", "describe_project"] + sys.argv[1:],
         commands_module="estela_scrapy.commands",
@@ -45,6 +47,8 @@ def setup_and_launch():
         job = decode_job()
         assert job, "JOB_INFO must be set"
         args, env = get_args_and_env(job)
+
+        from estela_scrapy.env import setup_scrapy_conf
 
         os.environ.update(env)
         setup_scrapy_conf()
@@ -58,7 +62,12 @@ def setup_and_launch():
 
 
 def main():
+    from estela_scrapy.producer import producer
     try:
+        if producer.get_connection():
+            logging.debug("Successful connection to queue platform.")
+        else:
+            raise Exception("Could not connect to the queue platform.")
         setup_and_launch()
         code = 0
     except SystemExit as ex:

@@ -2,3 +2,4 @@ Scrapy>=1.0
 requests
 black
 pytest
+pytest-env

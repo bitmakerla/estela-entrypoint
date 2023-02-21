@@ -12,7 +12,3 @@ def parse_queue_params():
 
 
 producer = get_producer_interface(os.getenv("QUEUE_PLATFORM"), **parse_queue_params())
-if producer.get_connection():
-    logging.debug("Successful connection to queue platform.")
-else:
-    raise Exception("Could not connect to the queue platform.")

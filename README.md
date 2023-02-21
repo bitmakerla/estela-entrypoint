@@ -34,6 +34,7 @@ Job specifications are passed through env variables:
   - [Required] _api_host_: API host URL.
   - [Optional] _args_: Dictionary with job arguments.
   - [Required] _collection_: String with name of collection where items will be stored.
+  - [Optional] _unique_: String, `"True"` if the data will be stored in a unique collection, `"False"` otherwise. Required only for cronjobs.
 - `QUEUE_PLATFORM`: The queue platform used by estela, review the list of the currently supported platforms.
 - `QUEUE_PLATFORM_{PARAMETERS}`: Please, refer to the `estela-queue-adapter` documentation to declare the needed variables.
 
