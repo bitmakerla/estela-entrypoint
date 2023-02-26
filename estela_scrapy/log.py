@@ -5,11 +5,10 @@ import time
 import warnings
 
 from estela_queue_adapter import queue_noisy_libraries
-from scrapy import __version__
 from twisted.python import log as txlog
 
-from estela_scrapy.producer import producer
-from estela_scrapy.utils import to_standar_str
+from estela_scrapy.utils import producer, to_standar_str
+
 
 _stderr = sys.stderr
 

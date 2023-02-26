@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from estela_queue_adapter import get_producer_interface
+
 
 def parse_time(date=None):
     if date is None:
@@ -20,3 +22,6 @@ def to_standar_str(text, encoding="utf-8", errors="strict"):
     if not isinstance(text, bytes):
         raise TypeError("Unable to standardize {} type".format(type(text).__name__))
     return text.decode(encoding, errors)
+
+
+producer = get_producer_interface()

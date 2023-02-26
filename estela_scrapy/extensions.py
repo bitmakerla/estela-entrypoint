@@ -1,13 +1,13 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import requests
 from scrapy import signals
 from scrapy.exporters import PythonItemExporter
 
-from estela_scrapy.producer import producer
-from estela_scrapy.utils import datetime_to_json
+from estela_scrapy.utils import producer
+
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
@@ -78,7 +78,7 @@ class ItemStorageExtension:
             request_count=spider_stats.get("downloader/request_count", 0),
         )
 
-        parser_stats = json.dumps(spider_stats, default=datetime_to_json)
+        parser_stats = json.dumps(spider_stats, default=str)
         data = {
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parser_stats),

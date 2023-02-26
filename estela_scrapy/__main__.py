@@ -62,10 +62,11 @@ def setup_and_launch():
 
 
 def main():
-    from estela_scrapy.producer import producer
+    from estela_scrapy.utils import producer
+
     try:
         if producer.get_connection():
-            logging.debug("Successful connection to queue platform.")
+            logging.debug("Successful connection to the queue platform.")
         else:
             raise Exception("Could not connect to the queue platform.")
         setup_and_launch()

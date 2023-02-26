@@ -2,8 +2,7 @@ import os
 
 from scrapy.utils.request import request_fingerprint
 
-from estela_scrapy.producer import producer
-from estela_scrapy.utils import parse_time
+from estela_scrapy.utils import parse_time, producer
 
 
 class StorageDownloaderMiddleware:
