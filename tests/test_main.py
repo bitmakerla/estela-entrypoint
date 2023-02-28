@@ -79,10 +79,10 @@ def test_describe_project(mock_run_code, mock_setup_scrapy_conf):
     assert run_kwargs["commands_module"] == "estela_scrapy.commands"
 
 
-@mock.patch("estela_scrapy.producer.producer.get_connection", return_value=True)
+@mock.patch("estela_scrapy.utils.producer.get_connection", return_value=True)
 @mock.patch("estela_scrapy.__main__.setup_and_launch")
-@mock.patch("estela_scrapy.producer.producer.flush")
-@mock.patch("estela_scrapy.producer.producer.close")
+@mock.patch("estela_scrapy.utils.producer.flush")
+@mock.patch("estela_scrapy.utils.producer.close")
 def test_main(mock_get_conn, mock_close, mock_flush, mock_setup_and_launch):
     exit_code = main()
     assert mock_get_conn.called
