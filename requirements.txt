@@ -35,6 +35,8 @@ cssselect==1.1.0
     # via
     #   parsel
     #   scrapy
+estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git@BITMAKER-2425
+    # via -r requirements.in
 exceptiongroup==1.1.0
     # via pytest
 h2==3.2.0
@@ -63,6 +65,8 @@ itemloaders==1.0.4
     # via scrapy
 jmespath==0.10.0
     # via itemloaders
+kafka-python==2.0.2
+    # via estela-queue-adapter
 lxml==4.6.3
     # via
     #   parsel
