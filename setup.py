@@ -10,7 +10,7 @@ setup(
     install_requires=[
         "Scrapy>=1.0",
         "requests",
-        "estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git@BITMAKER-2425"
+        "estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git"
     ],
     entry_points={
         "console_scripts": [

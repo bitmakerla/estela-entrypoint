@@ -1,4 +1,4 @@
-# Estela Entrypoint
+# estela Entrypoint
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![version](https://img.shields.io/badge/version-0.1-blue)](https://github.com/bitmakerla/estela-entrypoint)
@@ -35,8 +35,10 @@ Job specifications are passed through env variables:
   - [Optional] _args_: Dictionary with job arguments.
   - [Required] _collection_: String with name of collection where items will be stored.
   - [Optional] _unique_: String, `"True"` if the data will be stored in a unique collection, `"False"` otherwise. Required only for cronjobs.
-- `QUEUE_PLATFORM`: The queue platform used by estela, review the list of the currently supported platforms.
-- `QUEUE_PLATFORM_{PARAMETERS}`: Please, refer to the `estela-queue-adapter` documentation to declare the needed variables.
+- `QUEUE_PLATFORM`: The queue platform used by estela, review the list of the current
+  [supported platforms](https://estela.bitmaker.la/docs/estela/queueing.html#supported-platforms).
+- `QUEUE_PLATFORM_{PARAMETERS}`: Please, refer to the `estela-queue-adapter` 
+  [documentation](https://estela.bitmaker.la/docs/estela/queueing.html#estela-queue-adapter) to declare the needed variables.
 
 ## Testing
 
