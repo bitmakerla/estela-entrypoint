@@ -1,13 +1,13 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import requests
 from scrapy import signals
 from scrapy.exporters import PythonItemExporter
 
-from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
-from estela_scrapy.utils import datetime_to_json
+from estela_scrapy.utils import producer
+
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
@@ -18,7 +18,6 @@ FINISHED_REASON = "finished"
 class ItemStorageExtension:
     def __init__(self, stats):
         self.stats = stats
-        self.producer = connect_kafka_producer()
         exporter_kwargs = {"binary": False}
         self.exporter = PythonItemExporter(**exporter_kwargs)
         job = os.getenv("ESTELA_SPIDER_JOB")
@@ -67,7 +66,7 @@ class ItemStorageExtension:
             "payload": dict(item),
             "unique": os.getenv("ESTELA_UNIQUE_COLLECTION"),
         }
-        self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
+        producer.send("job_items", data)
 
     def spider_closed(self, spider, reason):
         spider_stats = self.stats.get_stats()
@@ -84,5 +83,4 @@ class ItemStorageExtension:
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parser_stats),
         }
-        self.producer.send("job_stats", value=data).add_errback(on_kafka_send_error)
-        self.producer.flush()
+        producer.send("job_stats", data)

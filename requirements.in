@@ -1,5 +1,6 @@
 Scrapy>=1.0
-kafka-python
 requests
 black
 pytest
+pytest-env
+git+https://github.com/bitmakerla/estela-queue-adapter.git

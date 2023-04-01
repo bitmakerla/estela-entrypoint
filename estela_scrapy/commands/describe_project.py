@@ -1,7 +1,7 @@
 import json
 import subprocess
-from pkg_resources import parse_version
 
+from pkg_resources import parse_version
 from scrapy import __version__
 from scrapy.commands import ScrapyCommand
 
