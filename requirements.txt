@@ -35,7 +35,7 @@ cssselect==1.1.0
     # via
     #   parsel
     #   scrapy
-estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git@json-serializer-hotfix
+estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git
     # via -r requirements.in
 exceptiongroup==1.1.0
     # via pytest
