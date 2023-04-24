@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from estela_queue_adapter import get_producer_interface
 
@@ -10,13 +10,15 @@ def parse_time(date=None):
     return parsed_time
 
 
-def datetime_to_json(o):
-    if isinstance(o, datetime):
-        return o.__str__()
-    raise TypeError("Type {} not serializable".format(type(o)))
+def json_serializer(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if hasattr(obj, "__str__"):
+        return str(obj)
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
-def to_standar_str(text, encoding="utf-8", errors="strict"):
+def to_standard_str(text, encoding="utf-8", errors="strict"):
     if isinstance(text, str):
         return text
     if not isinstance(text, bytes):
