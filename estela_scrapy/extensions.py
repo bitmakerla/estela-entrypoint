@@ -10,8 +10,6 @@ from estela_scrapy.utils import json_serializer, producer
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
-INCOMPLETE_STATUS = "INCOMPLETE"
-FINISHED_REASON = "finished"
 
 
 class ItemStorageExtension:
@@ -70,7 +68,7 @@ class ItemStorageExtension:
     def spider_closed(self, spider, reason):
         spider_stats = self.stats.get_stats()
         self.update_job(
-            status=COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS,
+            status=COMPLETED_STATUS,
             lifespan=spider_stats.get("elapsed_time_seconds", 0),
             total_bytes=spider_stats.get("downloader/response_bytes", 0),
             item_count=spider_stats.get("item_scraped_count", 0),
