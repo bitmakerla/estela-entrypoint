@@ -26,7 +26,6 @@ class BaseExtension:
         self.job_url = "{}/api/projects/{}/spiders/{}/jobs/{}".format(
             host, project_pid, spider_sid, self.job_jid
         )
-        self.producer = connect_kafka_producer()
 
 
 class ItemStorageExtension(BaseExtension):
@@ -52,7 +51,7 @@ class ItemStorageExtension(BaseExtension):
             "payload": dict(item),
             "unique": os.getenv("ESTELA_UNIQUE_COLLECTION"),
         }
-        self.producer.send("job_items", data)
+        producer.send("job_items", data)
 
 
 class RedisStatsCollector(BaseExtension):
@@ -105,8 +104,8 @@ class RedisStatsCollector(BaseExtension):
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parsed_stats),
         }
-        self.producer.send("job_stats", value=data).add_errback(on_kafka_send_error)
-        self.producer.flush()
+        producer.send("job_stats", value=data).add_errback(on_kafka_send_error)
+        producer.flush()
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
