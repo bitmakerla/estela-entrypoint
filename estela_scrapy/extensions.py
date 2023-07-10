@@ -8,7 +8,6 @@ from scrapy.exceptions import NotConfigured
 from scrapy.exporters import PythonItemExporter
 from twisted.internet import task
 
-from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
 from estela_scrapy.utils import json_serializer, producer
 
 from .utils import json_serializer, update_job
@@ -53,7 +52,7 @@ class ItemStorageExtension(BaseExtension):
             "payload": dict(item),
             "unique": os.getenv("ESTELA_UNIQUE_COLLECTION"),
         }
-        producer.send("job_items", data)
+        self.producer.send("job_items", data)
 
 
 class RedisStatsCollector(BaseExtension):
@@ -67,7 +66,6 @@ class RedisStatsCollector(BaseExtension):
 
         self.stats_key = os.getenv("REDIS_STATS_KEY")
         self.interval = float(os.getenv("REDIS_STATS_INTERVAL"))
-        print("JUST TESTING")
 
     @classmethod
     def from_crawler(cls, crawler):
