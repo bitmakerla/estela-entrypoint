@@ -67,6 +67,7 @@ class RedisStatsCollector(BaseExtension):
 
         self.stats_key = os.getenv("REDIS_STATS_KEY")
         self.interval = float(os.getenv("REDIS_STATS_INTERVAL"))
+        print("JUST TESTING")
 
     @classmethod
     def from_crawler(cls, crawler):
