@@ -1,7 +1,6 @@
 import json
 import os
-import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import redis
 from scrapy import signals
@@ -10,13 +9,12 @@ from scrapy.exporters import PythonItemExporter
 from twisted.internet import task
 
 from estela_scrapy.producer import connect_kafka_producer, on_kafka_send_error
+from estela_scrapy.utils import json_serializer, producer
 
 from .utils import json_serializer, update_job
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
-INCOMPLETE_STATUS = "INCOMPLETE"
-FINISHED_REASON = "finished"
 
 
 class BaseExtension:
@@ -50,16 +48,12 @@ class ItemStorageExtension(BaseExtension):
 
     def item_scraped(self, item, spider):
         item = self.exporter.export_item(item)
-
-        self.stats.inc_value("database_size_sys", sys.getsizeof(item))
-        self.stats.inc_value("database_size_json", len(json.dumps(item, default=str)))
-
         data = {
             "jid": os.getenv("ESTELA_COLLECTION"),
             "payload": dict(item),
             "unique": os.getenv("ESTELA_UNIQUE_COLLECTION"),
         }
-        self.producer.send("job_items", value=data).add_errback(on_kafka_send_error)
+        producer.send("job_items", data)
 
 
 class RedisStatsCollector(BaseExtension):
@@ -90,6 +84,7 @@ class RedisStatsCollector(BaseExtension):
     def spider_closed(self, spider, reason):
         if self.task.running:
             self.task.stop()
+
         try:
             self.redis_conn.delete(self.stats_key)
         except Exception:
@@ -99,7 +94,7 @@ class RedisStatsCollector(BaseExtension):
         update_job(
             self.job_url,
             self.auth_token,
-            status=COMPLETED_STATUS if reason == FINISHED_REASON else INCOMPLETE_STATUS,
+            status=COMPLETED_STATUS,
             lifespan=int(stats.get("elapsed_time_seconds", 0)),
             total_bytes=stats.get("downloader/response_bytes", 0),
             item_count=stats.get("item_scraped_count", 0),
@@ -117,15 +112,7 @@ class RedisStatsCollector(BaseExtension):
     def store_stats(self, spider):
         stats = self.stats.get_stats()
         elapsed_time = int((datetime.now() - stats.get("start_time")).total_seconds())
-        database_size_sys = stats.get("database_size_sys", 0)
-        database_size_json = stats.get("database_size_json", 0)
-        stats.update(
-            {
-                "elapsed_time_seconds": elapsed_time,
-                "database_size_sys": database_size_sys,
-                "database_size_json": database_size_json,
-            }
-        )
+        stats.update({"elapsed_time_seconds": elapsed_time})
 
         parsed_stats = json.dumps(stats, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))

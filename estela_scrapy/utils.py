@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 
 import requests
+from estela_queue_adapter import get_producer_interface
 
 
 def parse_time(date=None):
@@ -46,3 +47,6 @@ def update_job(
         },
         headers={"Authorization": "Token {}".format(auth_token)},
     )
+
+
+producer = get_producer_interface()

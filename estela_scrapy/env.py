@@ -20,7 +20,6 @@ def get_api_args(args_dict):
 def get_args_and_env(msg):
     args = ["scrapy", "crawl", str(msg["spider"])]
     args += get_api_args(msg.get("args", {}))
-    # consider API settings [!] missing
     env = {
         "ESTELA_SPIDER_JOB": msg["key"],
         "ESTELA_SPIDER_NAME": msg["spider"],

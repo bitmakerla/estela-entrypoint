@@ -24,7 +24,6 @@ def update_deprecated_classpaths(settings):
 
 
 def load_default_settings(settings):
-    # Load the default ESTELA-APP settings
     downloader_middlewares = {
         "estela_scrapy.middlewares.StorageDownloaderMiddleware": 1000,
     }
@@ -36,8 +35,6 @@ def load_default_settings(settings):
     settings.get("DOWNLOADER_MIDDLEWARES_BASE").update(downloader_middlewares)
     settings.get("EXTENSIONS_BASE").update(extensions)
     settings.get("SPIDER_MIDDLEWARES_BASE").update(spider_middlewares)
-    # memory_limit [!] missing
-    # set other default settings with max priority
     settings.setdict({"LOG_LEVEL": "INFO"}, priority="cmdline")
     settings.setdict({"LOG_ENABLED": False}, priority="cmdline")
 
@@ -46,10 +43,5 @@ def populate_settings():
     assert "scrapy.conf" not in sys.modules, "Scrapy settings already loaded"
     settings = get_project_settings().copy()
     update_deprecated_classpaths(settings)
-    # consider use special class if there're problems with AWS and encoding [!] missing
-    # consider API settings [!] missing
-    # https://shub.readthedocs.io/en/stable/custom-images-contract.html#shub-settings
     load_default_settings(settings)
-    # load and merge API settings according to priority [job > spider > organization > project]
-    # afeter merging, somre enforcement might be done [!] missing
     return settings
