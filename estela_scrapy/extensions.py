@@ -38,11 +38,7 @@ class ItemStorageExtension(BaseExtension):
     def from_crawler(cls, crawler):
         ext = cls(crawler.stats)
         crawler.signals.connect(ext.item_scraped, signals.item_scraped)
-        crawler.signals.connect(ext.spider_opened, signals.spider_opened)
         return ext
-
-    def spider_opened(self, spider):
-        update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
 
     def item_scraped(self, item, spider):
         item = self.exporter.export_item(item)
@@ -76,6 +72,7 @@ class RedisStatsCollector(BaseExtension):
         return ext
 
     def spider_opened(self, spider):
+        update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)
         self.task.start(self.interval)
 
@@ -104,8 +101,7 @@ class RedisStatsCollector(BaseExtension):
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parsed_stats),
         }
-        producer.send("job_stats", value=data).add_errback(on_kafka_send_error)
-        producer.flush()
+        producer.send("job_stats", value=data)
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
