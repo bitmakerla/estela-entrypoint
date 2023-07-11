@@ -1,5 +1,6 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
+import requests
 from estela_queue_adapter import get_producer_interface
 
 
@@ -24,6 +25,28 @@ def to_standard_str(text, encoding="utf-8", errors="strict"):
     if not isinstance(text, bytes):
         raise TypeError("Unable to standardize {} type".format(type(text).__name__))
     return text.decode(encoding, errors)
+
+
+def update_job(
+    job_url,
+    auth_token,
+    status,
+    lifespan=timedelta(seconds=0),
+    total_bytes=0,
+    item_count=0,
+    request_count=0,
+):
+    requests.patch(
+        job_url,
+        data={
+            "status": status,
+            "lifespan": lifespan,
+            "total_response_bytes": total_bytes,
+            "item_count": item_count,
+            "request_count": request_count,
+        },
+        headers={"Authorization": "Token {}".format(auth_token)},
+    )
 
 
 producer = get_producer_interface()

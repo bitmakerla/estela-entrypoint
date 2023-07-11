@@ -9,7 +9,6 @@ from twisted.python import log as txlog
 
 from estela_scrapy.utils import producer, to_standard_str
 
-
 _stderr = sys.stderr
 
 

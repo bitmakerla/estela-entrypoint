@@ -1,6 +1,7 @@
 Scrapy>=1.0
 requests
 black
+redis
 pytest
 pytest-env
 git+https://github.com/bitmakerla/estela-queue-adapter.git

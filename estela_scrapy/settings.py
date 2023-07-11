@@ -29,7 +29,8 @@ def load_default_settings(settings):
     }
     spider_middlewares = {}
     extensions = {
-        "estela_scrapy.extensions.ItemStorageExtension": 1000,
+        "estela_scrapy.extensions.ItemStorageExtension": 999,
+        "estela_scrapy.extensions.RedisStatsCollector": 1000,
     }
     settings.get("DOWNLOADER_MIDDLEWARES_BASE").update(downloader_middlewares)
     settings.get("EXTENSIONS_BASE").update(extensions)
