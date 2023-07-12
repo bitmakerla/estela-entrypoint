@@ -101,7 +101,7 @@ class RedisStatsCollector(BaseExtension):
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": json.loads(parsed_stats),
         }
-        producer.send("job_stats", value=data)
+        producer.send("job_stats", data)
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
