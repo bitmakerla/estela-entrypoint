@@ -53,7 +53,7 @@ class CustomProxyMiddleware:
         return cls(crawler.settings, crawler.stats, crawler.spider)
 
     def get_proxies_attributes(self, settings):
-        username = os.getenv("ESTELA_PROXY_URL")
+        username = os.getenv("ESTELA_PROXY_USER")
         password = os.getenv("ESTELA_PROXY_PASS")
         port = os.getenv("ESTELA_PROXY_PORT")
         url = os.getenv("ESTELA_PROXY_URL")
