@@ -94,6 +94,7 @@ class RedisStatsCollector(BaseExtension):
             total_bytes=stats.get("downloader/response_bytes", 0),
             item_count=stats.get("item_scraped_count", 0),
             request_count=stats.get("downloader/request_count", 0),
+            proxy_response_bytes=stats.get("downloader/proxies/response_bytes", 0),
         )
 
         parsed_stats = json.dumps(stats, default=json_serializer)
