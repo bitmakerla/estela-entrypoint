@@ -35,6 +35,7 @@ def update_job(
     total_bytes=0,
     item_count=0,
     request_count=0,
+    proxy_response_bytes=0,
 ):
     requests.patch(
         job_url,
@@ -44,6 +45,7 @@ def update_job(
             "total_response_bytes": total_bytes,
             "item_count": item_count,
             "request_count": request_count,
+            "proxy_response_bytes": proxy_response_bytes,
         },
         headers={"Authorization": "Token {}".format(auth_token)},
     )
