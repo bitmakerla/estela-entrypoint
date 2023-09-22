@@ -66,6 +66,7 @@ class CustomProxyMiddleware:
         # self.port = getattr(spider, "proxy_port", settings.get('PROXY_PORT'))
         self.username, self.password, self.port, self.url = self.get_proxies_attributes(settings)
         self.stats = stats
+        self.stats["downloader/proxy_name"] = os.getenv("ESTELA_PROXY_NAME")
  
     def process_request(self, request, spider):
         if not request.meta.get("proxies_disabled"):
