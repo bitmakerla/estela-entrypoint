@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import json
 
 import requests
 from estela_queue_adapter import get_producer_interface
@@ -45,7 +46,7 @@ def update_job(
             "total_response_bytes": total_bytes,
             "item_count": item_count,
             "request_count": request_count,
-            "proxy_usage_data": proxy_usage_data,
+            "proxy_usage_data": json.dumps(proxy_usage_data),
         },
         headers={"Authorization": "Token {}".format(auth_token)},
     )
