@@ -3,6 +3,8 @@ import json
 
 import requests
 from estela_queue_adapter import get_producer_interface
+import logging
+logger = logging.getLogger()
 
 
 def parse_time(date=None):
@@ -39,7 +41,7 @@ def update_job(
     proxy_usage_data={},
 ):
     print("Patch request: ")
-    print(json.dumps(proxy_usage_data))
+    logger.warning(json.dumps(proxy_usage_data))
     requests.patch(
         job_url,
         data={
