@@ -40,8 +40,6 @@ def update_job(
     request_count=0,
     proxy_usage_data={},
 ):
-    print("Patch request: ")
-    logger.warning(json.dumps(proxy_usage_data))
     requests.patch(
         job_url,
         data={

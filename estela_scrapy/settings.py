@@ -26,7 +26,7 @@ def update_deprecated_classpaths(settings):
 def load_default_settings(settings):
     downloader_middlewares = {
         "estela_scrapy.middlewares.StorageDownloaderMiddleware": 1000,
-        "estela_scrapy.middlewares.CustomProxyMiddleware": 702,
+        "estela_scrapy.middlewares.EstelaProxyMiddleware": 702,
     }
     spider_middlewares = {}
     extensions = {
