@@ -1,9 +1,10 @@
-from datetime import date, datetime, timedelta
 import json
+import logging
+from datetime import date, datetime, timedelta
 
 import requests
 from estela_queue_adapter import get_producer_interface
-import logging
+
 logger = logging.getLogger()
 
 

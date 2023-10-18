@@ -1,15 +1,15 @@
 import logging
 import os
-from twisted.web import http
 
-
-from scrapy.utils.request import request_fingerprint
-from scrapy.utils.python import to_bytes
 from scrapy.exceptions import NotConfigured
+from scrapy.utils.python import to_bytes
+from scrapy.utils.request import request_fingerprint
+from twisted.web import http
 
 from estela_scrapy.utils import parse_time, producer
 
 proxy_logger = logging.getLogger("proxy_mw")
+
 
 def get_header_size(headers):
     size = 0
@@ -44,7 +44,7 @@ class StorageDownloaderMiddleware:
 
 class EstelaProxyMiddleware:
     @classmethod
-    def from_crawler(cls, crawler): 
+    def from_crawler(cls, crawler):
         estela_proxies_enabled = os.getenv("ESTELA_PROXIES_ENABLED")
         if not estela_proxies_enabled:
             raise NotConfigured
@@ -56,17 +56,21 @@ class EstelaProxyMiddleware:
         port = os.getenv("ESTELA_PROXY_PORT")
         url = os.getenv("ESTELA_PROXY_URL")
         return username, password, port, url
-       
+
     def __init__(self, settings, stats, spider):
-        self.username, self.password, self.port, self.url = self.get_proxies_attributes(settings)
+        self.username, self.password, self.port, self.url = self.get_proxies_attributes(
+            settings
+        )
         self.stats = stats
-        self.stats.set_value("downloader/proxy_name", os.getenv("ESTELA_PROXY_NAME"), spider=spider)
- 
+        self.stats.set_value(
+            "downloader/proxy_name", os.getenv("ESTELA_PROXY_NAME"), spider=spider
+        )
+
     def process_request(self, request, spider):
         if not request.meta.get("proxies_disabled"):
             proxy_logger.debug("Using proxies with request %s", request.url)
-            host = f'http://{self.username}:{self.password}@{self.url}:{self.port}'
-            request.meta['proxy'] = host
+            host = f"http://{self.username}:{self.password}@{self.url}:{self.port}"
+            request.meta["proxy"] = host
             self.stats.inc_value("downloader/proxies/count", spider=spider)
 
     def process_response(self, request, response, spider):
@@ -77,5 +81,7 @@ class EstelaProxyMiddleware:
                 + get_status_size(response.status)
                 + 4
             )
-            self.stats.inc_value("downloader/proxies/response_bytes", reslen, spider=spider)
+            self.stats.inc_value(
+                "downloader/proxies/response_bytes", reslen, spider=spider
+            )
         return response
