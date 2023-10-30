@@ -1,3 +1,4 @@
+import json
 from datetime import date, datetime, timedelta
 
 import requests
@@ -35,6 +36,7 @@ def update_job(
     total_bytes=0,
     item_count=0,
     request_count=0,
+    proxy_usage_data={},
 ):
     requests.patch(
         job_url,
@@ -44,6 +46,7 @@ def update_job(
             "total_response_bytes": total_bytes,
             "item_count": item_count,
             "request_count": request_count,
+            "proxy_usage_data": json.dumps(proxy_usage_data),
         },
         headers={"Authorization": "Token {}".format(auth_token)},
     )
