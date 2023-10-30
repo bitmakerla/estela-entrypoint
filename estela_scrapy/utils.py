@@ -1,11 +1,8 @@
 import json
-import logging
 from datetime import date, datetime, timedelta
 
 import requests
 from estela_queue_adapter import get_producer_interface
-
-logger = logging.getLogger()
 
 
 def parse_time(date=None):
