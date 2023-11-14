@@ -69,7 +69,7 @@ class EstelaProxyMiddleware:
     def process_request(self, request, spider):
         if not request.meta.get("proxies_disabled"):
             proxy_logger.debug("Using proxies with request %s", request.url)
-            host = f"http://{self.username}:{self.password}@{self.url}:{self.port}"
+            host = f"https://{self.username}:{self.password}@{self.url}:{self.port}"
             request.meta["proxy"] = host
             self.stats.inc_value("downloader/proxies/count", spider=spider)
 
