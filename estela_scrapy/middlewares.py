@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 from scrapy.exceptions import NotConfigured
 from scrapy.utils.python import to_bytes
@@ -44,7 +45,7 @@ class StorageDownloaderMiddleware:
 
 class EstelaProxyMiddleware:
     @classmethod
-    def from_crawler(cls, crawler):
+    def from_crawler(cls, crawler): 
         estela_proxies_enabled = os.getenv("ESTELA_PROXIES_ENABLED")
         if not estela_proxies_enabled:
             raise NotConfigured
@@ -56,20 +57,18 @@ class EstelaProxyMiddleware:
         port = os.getenv("ESTELA_PROXY_PORT")
         url = os.getenv("ESTELA_PROXY_URL")
         return username, password, port, url
-
+       
     def __init__(self, settings, stats, spider):
-        self.username, self.password, self.port, self.url = self.get_proxies_attributes(
-            settings
-        )
+        self.username, self.password, self.port, self.url = self.get_proxies_attributes(settings)
         self.stats = stats
-        self.stats.set_value(
-            "downloader/proxy_name", os.getenv("ESTELA_PROXY_NAME"), spider=spider
-        )
-
+        self.stats.set_value("downloader/proxy_name", os.getenv("ESTELA_PROXY_NAME"), spider=spider)
+ 
     def process_request(self, request, spider):
         if not request.meta.get("proxies_disabled"):
+            proxy_scheme = "https" if self.url.startswith("https://") else "http"
             proxy_logger.debug("Using proxies with request %s", request.url)
-            host = f"http://{self.username}:{self.password}@{self.url}:{self.port}"
+            host_wo_schema = re.sub(f"{proxy_scheme}://", "", self.url)
+            host = f"{proxy_scheme}://{self.username}:{self.password}@{host_wo_schema}:{self.port}"
             request.meta["proxy"] = host
             self.stats.inc_value("downloader/proxies/count", spider=spider)
 
@@ -81,7 +80,5 @@ class EstelaProxyMiddleware:
                 + get_status_size(response.status)
                 + 4
             )
-            self.stats.inc_value(
-                "downloader/proxies/response_bytes", reslen, spider=spider
-            )
+            self.stats.inc_value("downloader/proxies/response_bytes", reslen, spider=spider)
         return response
