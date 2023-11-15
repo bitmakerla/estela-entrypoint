@@ -45,7 +45,7 @@ class StorageDownloaderMiddleware:
 
 class EstelaProxyMiddleware:
     @classmethod
-    def from_crawler(cls, crawler): 
+    def from_crawler(cls, crawler):
         estela_proxies_enabled = os.getenv("ESTELA_PROXIES_ENABLED")
         if not estela_proxies_enabled:
             raise NotConfigured
@@ -57,7 +57,7 @@ class EstelaProxyMiddleware:
         port = os.getenv("ESTELA_PROXY_PORT")
         url = os.getenv("ESTELA_PROXY_URL")
         return username, password, port, url
-       
+
     def __init__(self, settings, stats, spider):
         self.username, self.password, self.port, self.url = self.get_proxies_attributes(settings)
         self.stats = stats
