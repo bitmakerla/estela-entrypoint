@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 from scrapy.exceptions import NotConfigured
 from scrapy.utils.python import to_bytes
@@ -45,22 +46,21 @@ class StorageDownloaderMiddleware:
 class EstelaProxyMiddleware:
     @classmethod
     def from_crawler(cls, crawler):
-        estela_proxies_enabled = os.getenv("ESTELA_PROXIES_ENABLED")
+        estela_proxies_enabled = os.getenv("ESTELA_PROXIES_ENABLED", False)
         if not estela_proxies_enabled:
             raise NotConfigured
-        return cls(crawler.settings, crawler.stats, crawler.spider)
+        return cls(crawler.stats, crawler.spider)
 
-    def get_proxies_attributes(self, settings):
-        username = os.getenv("ESTELA_PROXY_USER")
-        password = os.getenv("ESTELA_PROXY_PASS")
-        port = os.getenv("ESTELA_PROXY_PORT")
-        url = os.getenv("ESTELA_PROXY_URL")
-        return username, password, port, url
+    def __init__(self, stats, spider):
+        self.username = os.getenv("ESTELA_PROXY_USER", "")
+        self.password = os.getenv("ESTELA_PROXY_PASS", "")
+        self.port = os.getenv("ESTELA_PROXY_PORT", "")
+        self.url = os.getenv("ESTELA_PROXY_URL", "")
 
-    def __init__(self, settings, stats, spider):
-        self.username, self.password, self.port, self.url = self.get_proxies_attributes(
-            settings
-        )
+        proxy_scheme = "https" if self.url.startswith("https://") else "http"
+        host_wo_schema = re.sub(f"^{proxy_scheme}://", "", self.url)
+        self.full_proxy_url = f"{proxy_scheme}://{self.username}:{self.password}@{host_wo_schema}:{self.port}"
+
         self.stats = stats
         self.stats.set_value(
             "downloader/proxy_name", os.getenv("ESTELA_PROXY_NAME"), spider=spider
@@ -69,8 +69,7 @@ class EstelaProxyMiddleware:
     def process_request(self, request, spider):
         if not request.meta.get("proxies_disabled"):
             proxy_logger.debug("Using proxies with request %s", request.url)
-            host = f"http://{self.username}:{self.password}@{self.url}:{self.port}"
-            request.meta["proxy"] = host
+            request.meta["proxy"] = self.full_proxy_url
             self.stats.inc_value("downloader/proxies/count", spider=spider)
 
     def process_response(self, request, response, spider):
