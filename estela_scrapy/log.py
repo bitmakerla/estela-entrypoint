@@ -28,7 +28,7 @@ def init_logging():
     )  # NOSET Make processing all messages if is set in root
 
     hdlr = LogHandler()
-    hdlr.setLevel(logging.INFO)
+    hdlr.setLevel(logging.WARNING)
     hdlr.setFormatter(logging.Formatter("[%(name)s] %(message)s"))
     root.addHandler(hdlr)
 
