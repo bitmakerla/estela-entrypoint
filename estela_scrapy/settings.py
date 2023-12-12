@@ -36,7 +36,7 @@ def load_default_settings(settings):
     settings.get("DOWNLOADER_MIDDLEWARES_BASE").update(downloader_middlewares)
     settings.get("EXTENSIONS_BASE").update(extensions)
     settings.get("SPIDER_MIDDLEWARES_BASE").update(spider_middlewares)
-    settings.setdict({"LOG_LEVEL": "INFO"}, priority="cmdline")
+    settings.setdict({"LOG_LEVEL": "WARNING"}, priority="cmdline")
     settings.setdict({"LOG_ENABLED": False}, priority="cmdline")
 
 
