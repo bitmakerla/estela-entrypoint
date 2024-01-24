@@ -34,7 +34,7 @@ def init_logging():
 
     # Silence commonly used noisy libraries
     nh = logging.NullHandler()
-    for ln in ["requests"] + queue_noisy_libraries:
+    for ln in ["requests", "py.warnings"] + queue_noisy_libraries:
         lg = logging.getLogger(ln)
         lg.propagate = 0
         lg.addHandler(nh)
