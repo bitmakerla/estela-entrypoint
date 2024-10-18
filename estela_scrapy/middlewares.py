@@ -57,7 +57,7 @@ class EstelaProxyMiddleware:
         self.port = os.getenv("ESTELA_PROXY_PORT", "")
         self.url = os.getenv("ESTELA_PROXY_URL", "")
 
-        proxy_scheme = "https" if self.url.startswith("https://") else "http"
+        proxy_scheme = "http"
         host_wo_schema = re.sub(f"^{proxy_scheme}://", "", self.url)
         self.full_proxy_url = f"{proxy_scheme}://{self.username}:{self.password}@{host_wo_schema}:{self.port}"
 
