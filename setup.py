@@ -8,7 +8,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=[
-        "Scrapy>=1.0",
+        "Scrapy>=2.12.0",
         "requests",
         "redis",
         "estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git",
