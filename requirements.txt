@@ -39,7 +39,7 @@ cssselect==1.1.0
     #   scrapy
 defusedxml==0.7.1
     # via scrapy
-estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git
+estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git@update-kafka-version
     # via -r requirements.in
 exceptiongroup==1.1.0
     # via pytest

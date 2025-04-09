@@ -4,4 +4,5 @@ black
 redis
 pytest
 pytest-env
-git+https://github.com/bitmakerla/estela-queue-adapter.git
+git+https://github.com/bitmakerla/estela-queue-adapter.git@update-kafka-version
+
