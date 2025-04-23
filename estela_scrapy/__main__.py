@@ -63,12 +63,23 @@ def setup_and_launch():
 
 def main():
     from estela_scrapy.utils import producer
+    from scrapy import signals
+    from scrapy.signalmanager import dispatcher
 
     try:
         if producer.get_connection():
             logging.debug("Successful connection to the queue platform.")
         else:
             raise Exception("Could not connect to the queue platform.")
+        
+        # Register a shutdown handler to close the producer
+        def close_producer():
+            producer.flush()
+            producer.close()
+            logging.debug("Producer flushed and closed.")
+        
+        dispatcher.connect(close_producer, signal=signals.engine_stopped)
+        
         setup_and_launch()
         code = 0
     except SystemExit as ex:
@@ -76,8 +87,7 @@ def main():
     except:
         code = 1
     finally:
-        producer.flush()
-        producer.close()
+        pass
 
     return code
 
