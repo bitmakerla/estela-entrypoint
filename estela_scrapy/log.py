@@ -58,7 +58,8 @@ class LogHandler(logging.Handler):
         try:
             message = self.format(record)
             if message:
-                _logfn(message=message, level=record.levelno, parent="LogHandler")
+                pass
+                #_logfn(message=message, level=record.levelno, parent="LogHandler")
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
