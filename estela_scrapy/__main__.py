@@ -72,13 +72,13 @@ def main():
         else:
             raise Exception("Could not connect to the queue platform.")
         
-        # Register a shutdown handler to close the producer
-        def close_producer():
-            producer.flush()
-            producer.close()
-            logging.debug("Producer flushed and closed.")
+        # # Register a shutdown handler to close the producer
+        # def close_producer():
+        #     producer.flush()
+        #     producer.close()
+        #     logging.debug("Producer flushed and closed.")
         
-        dispatcher.connect(close_producer, signal=signals.engine_stopped)
+        # dispatcher.connect(close_producer, signal=signals.engine_stopped)
         
         setup_and_launch()
         code = 0
