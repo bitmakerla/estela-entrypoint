@@ -83,7 +83,8 @@ class LogObserver(object):
     def emit(self, ev):
         logitem = self._get_log_item(ev)
         if logitem:
-            _logfn(**logitem, parent="LogObserver")
+            pass
+            #_logfn(**logitem, parent="LogObserver")
 
     def _get_log_item(self, ev):
         """Get logs from scrapy in his level or Info level in other case"""
@@ -132,7 +133,8 @@ class StdoutLogger(txlog.StdioOnnaStick):
         self.loglevel = loglevel
 
     def _logprefixed(self, msg):
-        _logfn(message=self.prefix + msg, level=self.loglevel, parent="StdoutLogger")
+        pass
+        #_logfn(message=self.prefix + msg, level=self.loglevel, parent="StdoutLogger")
 
     def write(self, data):
         data = to_standard_str(data, self.encoding)
