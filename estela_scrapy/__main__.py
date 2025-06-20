@@ -68,7 +68,7 @@ def main():
 
     try:
         if producer.get_connection():
-            logging.debug("Successful connection to the queue platform.")
+            logging.info("Successful connection to the queue platform.")
         else:
             raise Exception("Could not connect to the queue platform.")
         
