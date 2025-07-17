@@ -31,7 +31,7 @@ class BaseExtension:
 class ItemStorageExtension(BaseExtension):
     def __init__(self, stats):
         super().__init__(stats)
-        exporter_kwargs = {"binary": False}
+        exporter_kwargs = {}
         self.exporter = PythonItemExporter(**exporter_kwargs)
 
     @classmethod
