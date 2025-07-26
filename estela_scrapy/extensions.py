@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import redis
 from scrapy import signals
@@ -31,7 +31,7 @@ class BaseExtension:
 class ItemStorageExtension(BaseExtension):
     def __init__(self, stats):
         super().__init__(stats)
-        exporter_kwargs = {"binary": False}
+        exporter_kwargs = {}
         self.exporter = PythonItemExporter(**exporter_kwargs)
 
     @classmethod
@@ -109,8 +109,12 @@ class RedisStatsCollector(BaseExtension):
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
-        elapsed_time = int((datetime.now() - stats.get("start_time")).total_seconds())
-        stats.update({"elapsed_time_seconds": elapsed_time})
-
+        start_time = stats.get("start_time")
+    
+        if start_time is not None:
+            now = datetime.now(timezone.utc) if start_time.tzinfo else datetime.now()
+            elapsed_time = int((now - start_time).total_seconds())
+            stats.update({"elapsed_time_seconds": elapsed_time})
+    
         parsed_stats = json.dumps(stats, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))
