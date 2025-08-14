@@ -2,6 +2,7 @@ Scrapy>=2.12.0
 requests
 black
 redis
+boto3
 pytest
 pytest-env
 git+https://github.com/bitmakerla/estela-queue-adapter.git@update-kafka-version
