@@ -42,6 +42,17 @@ def describe_project():
     )
 
 
+def report_deploy():
+    from estela_scrapy.env import setup_scrapy_conf
+
+    setup_scrapy_conf()
+
+    run_code(
+        ["scrapy", "report_deploy"] + sys.argv[1:],
+        commands_module="estela_scrapy.commands",
+    )
+
+
 def setup_and_launch():
     try:
         job = decode_job()

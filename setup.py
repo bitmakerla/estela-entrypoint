@@ -17,6 +17,7 @@ setup(
         "console_scripts": [
             "estela-crawl = estela_scrapy.__main__:main",
             "estela-describe-project = estela_scrapy.__main__:describe_project",
+            "estela-report-deploy = estela_scrapy.__main__:report_deploy",
         ],
     },
     classifiers=[
