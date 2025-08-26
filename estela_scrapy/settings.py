@@ -37,7 +37,7 @@ def load_default_settings(settings):
     settings.get("EXTENSIONS_BASE").update(extensions)
     settings.get("SPIDER_MIDDLEWARES_BASE").update(spider_middlewares)
     settings.setdict({"LOG_LEVEL": "INFO"}, priority="cmdline")
-    settings.setdict({"LOG_ENABLED": False}, priority="cmdline")
+    settings.setdict({"LOG_ENABLED": True}, priority="cmdline")
 
 
 def populate_settings():

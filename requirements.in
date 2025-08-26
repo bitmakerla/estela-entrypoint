@@ -1,7 +1,8 @@
-Scrapy>=1.0
+Scrapy==2.10.0
 requests
 black
 redis
+boto3
 pytest
 pytest-env
-git+https://github.com/bitmakerla/estela-queue-adapter.git
+estela-queue-adapter
