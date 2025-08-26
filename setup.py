@@ -2,21 +2,23 @@ from setuptools import find_packages, setup
 
 setup(
     name="estela-entrypoint",
-    version="0.1",
+    version="0.2.1",
     description="Scrapy entrypoint for Estela job runner",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=[
-        "Scrapy>=1.0",
+        "Scrapy==2.10.0",
         "requests",
         "redis",
-        "estela-queue-adapter @ git+https://github.com/bitmakerla/estela-queue-adapter.git",
+        "boto3",
+        "estela-queue-adapter",
     ],
     entry_points={
         "console_scripts": [
             "estela-crawl = estela_scrapy.__main__:main",
             "estela-describe-project = estela_scrapy.__main__:describe_project",
+            "estela-report-deploy = estela_scrapy.__main__:report_deploy",
         ],
     },
     classifiers=[
