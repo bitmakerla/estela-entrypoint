@@ -31,8 +31,8 @@ class BaseExtension:
 class ItemStorageExtension(BaseExtension):
     def __init__(self, stats):
         super().__init__(stats)
-        exporter_kwargs = {}
-        self.exporter = PythonItemExporter(**exporter_kwargs)
+        exporter_kwargs = {"binary": False}
+        self.exporter = PythonItemExporter(**exporter_kwargs, dont_fail=True)
 
     @classmethod
     def from_crawler(cls, crawler):
