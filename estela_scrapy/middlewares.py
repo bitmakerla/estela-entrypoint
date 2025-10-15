@@ -4,7 +4,7 @@ import re
 
 from scrapy.exceptions import NotConfigured
 from scrapy.utils.python import to_bytes
-from scrapy.utils.request import request_fingerprint
+from scrapy.utils.request import fingerprint as request_fingerprint
 from twisted.web import http
 
 from estela_scrapy.utils import parse_time, producer
