@@ -165,6 +165,12 @@ zope-interface==5.4.0
     # via
     #   scrapy
     #   twisted
+pydantic==2.10.6
+    # via -r requirements.in
+pydantic-core==2.27.2
+    # via pydantic
+annotated-types==0.7.0
+    # via pydantic
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
