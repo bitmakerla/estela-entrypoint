@@ -236,7 +236,7 @@ class RedisStatsCollector(BaseExtension):
         }
 
         stats.update({"elapsed_time_seconds": int(elapsed_time)})
-        stats.update({"metrics": final_metrics})
+        stats.update(final_metrics)
 
         try:
             self.redis_conn.delete(self.stats_key)
@@ -366,7 +366,7 @@ class RedisStatsCollector(BaseExtension):
         }
 
         stats.update({"elapsed_time_seconds": int(elapsed_time)})
-        stats.update({"metrics": metrics})
+        stats.update(metrics)
 
         parsed_stats = json.dumps(stats, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))

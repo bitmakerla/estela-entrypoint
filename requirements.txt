@@ -4,173 +4,179 @@
 #
 #    pip-compile requirements.in
 #
-appdirs==1.4.4
-    # via black
-async-timeout==4.0.2
+annotated-types==0.7.0
+    # via pydantic
+async-timeout==5.0.1
     # via redis
-attrs==21.2.0
+attrs==25.4.0
     # via
-    #   automat
-    #   pytest
     #   service-identity
     #   twisted
-automat==20.2.0
+automat==25.4.16
     # via twisted
-black==21.7b0
+black==25.9.0
     # via -r requirements.in
-boto3==1.40.10
+boto3==1.40.54
     # via -r requirements.in
-botocore==1.40.10
+botocore==1.40.54
     # via
     #   boto3
     #   s3transfer
-certifi==2021.5.30
+certifi==2025.10.5
     # via requests
-cffi==1.14.6
+cffi==2.0.0
     # via cryptography
-charset-normalizer==2.0.3
+charset-normalizer==3.4.4
     # via requests
-click==8.0.1
+click==8.3.0
     # via black
-constantly==15.1.0
+constantly==23.10.4
     # via twisted
-cryptography==45.0.6
+cryptography==46.0.3
     # via
     #   pyopenssl
     #   scrapy
     #   service-identity
-cssselect==1.1.0
+cssselect==1.3.0
     # via
     #   parsel
     #   scrapy
 estela-queue-adapter==0.1
     # via -r requirements.in
-exceptiongroup==1.1.0
+exceptiongroup==1.3.0
     # via pytest
-filelock==3.19.1
+filelock==3.20.0
     # via tldextract
 hyperlink==21.0.0
     # via twisted
-idna==3.2
+idna==3.11
     # via
     #   hyperlink
     #   requests
     #   tldextract
-incremental==21.3.0
+incremental==24.7.2
     # via twisted
-iniconfig==1.1.1
+iniconfig==2.1.0
     # via pytest
-itemadapter==0.3.0
+itemadapter==0.12.2
     # via
     #   itemloaders
     #   scrapy
-itemloaders==1.0.4
+itemloaders==1.3.2
     # via scrapy
-jmespath==0.10.0
+jmespath==1.0.1
     # via
     #   boto3
     #   botocore
     #   itemloaders
-kafka-python==2.0.2
+    #   parsel
+kafka-python==2.2.15
     # via estela-queue-adapter
-lxml==4.6.3
+lxml==6.0.2
     # via
     #   parsel
     #   scrapy
-mypy-extensions==0.4.3
+mypy-extensions==1.1.0
     # via black
-packaging==21.0
+packaging==25.0
     # via
+    #   black
+    #   parsel
     #   pytest
     #   scrapy
-parsel==1.6.0
+parsel==1.10.0
     # via
     #   itemloaders
     #   scrapy
-pathspec==0.9.0
+pathspec==0.12.1
     # via black
-pluggy==0.13.1
+platformdirs==4.5.0
+    # via black
+pluggy==1.6.0
     # via pytest
-protego==0.1.16
+protego==0.5.0
     # via scrapy
-pyasn1==0.4.8
+pyasn1==0.6.1
     # via
     #   pyasn1-modules
     #   service-identity
-pyasn1-modules==0.2.8
+pyasn1-modules==0.4.2
     # via service-identity
-pycparser==2.20
+pycparser==2.23
     # via cffi
-pydispatcher==2.0.5
+pydantic==2.12.2
+    # via -r requirements.in
+pydantic-core==2.41.4
+    # via pydantic
+pydispatcher==2.0.7
     # via scrapy
-pyopenssl==25.1.0
+pygments==2.19.2
+    # via pytest
+pyopenssl==25.3.0
     # via scrapy
-pyparsing==2.4.7
-    # via packaging
-pytest==7.2.1
+pytest==8.4.2
     # via
     #   -r requirements.in
     #   pytest-env
-pytest-env==0.8.1
+pytest-env==1.2.0
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via botocore
-queuelib==1.6.1
-    # via scrapy
-redis==4.6.0
-    # via -r requirements.in
-regex==2021.7.6
+pytokens==0.2.0
     # via black
-requests==2.26.0
+queuelib==1.8.0
+    # via scrapy
+redis==6.4.0
+    # via -r requirements.in
+requests==2.32.5
     # via
     #   -r requirements.in
     #   requests-file
     #   tldextract
-requests-file==2.1.0
+requests-file==3.0.0
     # via tldextract
-s3transfer==0.13.1
+s3transfer==0.14.0
     # via boto3
 scrapy==2.10.0
     # via -r requirements.in
-service-identity==21.1.0
+service-identity==24.2.0
     # via scrapy
-six==1.16.0
-    # via
-    #   automat
-    #   parsel
-    #   protego
-    #   python-dateutil
-    #   service-identity
-    #   w3lib
+six==1.17.0
+    # via python-dateutil
 tldextract==5.3.0
     # via scrapy
-tomli==1.0.4
+tomli==2.3.0
     # via
     #   black
+    #   incremental
     #   pytest
-twisted==21.2.0
+    #   pytest-env
+twisted==25.5.0
     # via scrapy
-typing-extensions==4.14.1
-    # via pyopenssl
-urllib3==1.26.6
+typing-extensions==4.15.0
+    # via
+    #   black
+    #   cryptography
+    #   exceptiongroup
+    #   pydantic
+    #   pydantic-core
+    #   pyopenssl
+    #   twisted
+    #   typing-inspection
+typing-inspection==0.4.2
+    # via pydantic
+urllib3==2.5.0
     # via
     #   botocore
     #   requests
-w3lib==1.22.0
+w3lib==2.3.1
     # via
-    #   itemloaders
     #   parsel
     #   scrapy
-zope-interface==5.4.0
+zope-interface==8.0.1
     # via
     #   scrapy
     #   twisted
-pydantic==2.10.6
-    # via -r requirements.in
-pydantic-core==2.27.2
-    # via pydantic
-annotated-types==0.7.0
-    # via pydantic
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
