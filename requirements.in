@@ -6,3 +6,4 @@ boto3
 pytest
 pytest-env
 estela-queue-adapter
+pydantic
