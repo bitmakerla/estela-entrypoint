@@ -14,6 +14,7 @@ from .utils import json_serializer, update_job
 
 RUNNING_STATUS = "RUNNING"
 COMPLETED_STATUS = "COMPLETED"
+ERROR_STATUS = "ERROR"
 
 
 class BaseExtension:
@@ -86,26 +87,38 @@ class RedisStatsCollector(BaseExtension):
             pass
 
         stats = self.stats.get_stats()
-        update_job(
-            self.job_url,
-            self.auth_token,
-            status=COMPLETED_STATUS,
-            lifespan=int(stats.get("elapsed_time_seconds", 0)),
-            total_bytes=stats.get("downloader/response_bytes", 0),
-            item_count=stats.get("item_scraped_count", 0),
-            request_count=stats.get("downloader/request_count", 0),
-            proxy_usage_data={
-                "proxy_name": stats.get("downloader/proxy_name", ""),
-                "bytes": stats.get("downloader/proxies/response_bytes", 0),
-            },
-        )
-
-        parsed_stats = json.dumps(stats, default=json_serializer)
-        data = {
-            "jid": os.getenv("ESTELA_SPIDER_JOB"),
-            "payload": json.loads(parsed_stats),
-        }
-        producer.send("job_stats", data)
+        job_status = COMPLETED_STATUS
+        
+        try:
+            # Put all new code here
+            parsed_stats = json.dumps(stats, default=json_serializer)
+            data = {
+                "jid": os.getenv("ESTELA_SPIDER_JOB"),
+                "payload": json.loads(parsed_stats),
+            }
+            producer.send("job_stats", data)
+            
+        except Exception as e:
+            print(f"Error during spider_closed: {e}")
+            job_status = ERROR_STATUS
+        
+        finally:
+            try:
+                update_job(
+                    self.job_url,
+                    self.auth_token,
+                    status=job_status,
+                    lifespan=int(stats.get("elapsed_time_seconds", 0)),
+                    total_bytes=stats.get("downloader/response_bytes", 0),
+                    item_count=stats.get("item_scraped_count", 0),
+                    request_count=stats.get("downloader/request_count", 0),
+                    proxy_usage_data={
+                        "proxy_name": stats.get("downloader/proxy_name", ""),
+                        "bytes": stats.get("downloader/proxies/response_bytes", 0),
+                    },
+                )
+            except Exception as e:
+                print(f"CRITICAL ERROR: Could not update job status: {e}")
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
