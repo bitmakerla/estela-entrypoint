@@ -105,7 +105,6 @@ class RedisStatsCollector(BaseExtension):
             self.max_buckets = None
             self.http_status_counter = None
             self.duplicate_items = None
-            self.field_coverage = None
             self.timeline = None
 
     def _init_advanced_metrics(self, schema, unique_field, max_buckets):
@@ -133,9 +132,6 @@ class RedisStatsCollector(BaseExtension):
             os.getenv("ESTELA_MAX_DUPLICATE_TRACKING", DEFAULT_MAX_DUPLICATE_TRACKING)
         )
         self.duplicate_items = set()
-
-        # Field coverage tracking
-        self.field_coverage = defaultdict(lambda: {"complete": 0, "empty": 0})
 
         # Timeline tracking (minute-based buckets for memory efficiency)
         self.max_buckets = max_buckets
@@ -200,13 +196,6 @@ class RedisStatsCollector(BaseExtension):
             except Exception:  # Generic exception - works with any validator
                 self.invalid_items += 1
 
-        # Field coverage tracking
-        for field, value in item.items():
-            if value is None or value == "" or value == []:
-                self.field_coverage[field]["empty"] += 1
-            else:
-                self.field_coverage[field]["complete"] += 1
-
         # Timeline tracking with cached time calculation (performance optimization)
         self.items_since_time_update += 1
         if self.items_since_time_update >= TIME_CACHE_UPDATE_INTERVAL:
@@ -263,6 +252,7 @@ class RedisStatsCollector(BaseExtension):
             status_200 = self.stats.get_value("downloader/response_count", 0)
 
         http_success_rate = (status_200 / total_requests * 100) if total_requests > 0 else 0
+        http_success_rate = min(100.0, http_success_rate)
 
         # Efficiency calculation based on requests per item
         requests_per_item_obtained = total_requests / items if items > 0 else float('inf')
@@ -321,11 +311,6 @@ class RedisStatsCollector(BaseExtension):
             metrics["advanced_metrics/schema_coverage/percentage"] = round(schema_coverage_percentage, 2)
             metrics["advanced_metrics/schema_coverage/valid"] = self.valid_items
             metrics["advanced_metrics/schema_coverage/checked"] = total_checked
-
-            # Field coverage metrics
-            for field, field_stats in self.field_coverage.items():
-                for stat_type, value in field_stats.items():
-                    metrics[f"advanced_metrics/schema_coverage/fields/{field}/{stat_type}"] = value
 
             # HTTP status tracking
             for status_code, count in self.http_status_counter.items():
