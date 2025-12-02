@@ -92,7 +92,8 @@ class RedisStatsCollector(BaseExtension):
         # true (default) = calculate continuously on every interval
         # false = calculate only at spider_closed
         self.continuous_metrics_calculation = (
-            os.getenv("ESTELA_CONTINUOUS_METRICS_CALCULATION", "false").lower() == "true"
+            os.getenv("ESTELA_CONTINUOUS_METRICS_CALCULATION",
+                      "false").lower() == "true"
         )
 
         # Always initialize all metrics tracking (no conditional)
@@ -102,14 +103,17 @@ class RedisStatsCollector(BaseExtension):
         """Initialize all metrics tracking data structures"""
         # ITEMS EXPECTED: Goal-based metrics
         items_expected_env = os.getenv("ITEMS_EXPECTED")
-        self.items_expected = int(items_expected_env) if items_expected_env else None
+        self.items_expected = int(
+            items_expected_env) if items_expected_env else None
 
         # SUCCESS RATE: Configurable weights
         self.success_rate_goal_weight = float(
-            os.getenv("SUCCESS_RATE_GOAL_WEIGHT", DEFAULT_SUCCESS_RATE_GOAL_WEIGHT)
+            os.getenv("SUCCESS_RATE_GOAL_WEIGHT",
+                      DEFAULT_SUCCESS_RATE_GOAL_WEIGHT)
         )
         self.success_rate_http_weight = float(
-            os.getenv("SUCCESS_RATE_HTTP_WEIGHT", DEFAULT_SUCCESS_RATE_HTTP_WEIGHT)
+            os.getenv("SUCCESS_RATE_HTTP_WEIGHT",
+                      DEFAULT_SUCCESS_RATE_HTTP_WEIGHT)
         )
 
         # Schema validation (works with any callable that raises exceptions)
@@ -120,7 +124,8 @@ class RedisStatsCollector(BaseExtension):
         # Duplicate tracking with memory cap
         self.unique_field = unique_field
         self.max_duplicate_items = int(
-            os.getenv("ESTELA_MAX_DUPLICATE_TRACKING", DEFAULT_MAX_DUPLICATE_TRACKING)
+            os.getenv("ESTELA_MAX_DUPLICATE_TRACKING",
+                      DEFAULT_MAX_DUPLICATE_TRACKING)
         )
         self.duplicate_items = set()
 
@@ -163,7 +168,6 @@ class RedisStatsCollector(BaseExtension):
         update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)
         self.task.start(self.interval)
-
 
     def item_scraped(self, item, spider):
         # Track metrics for this item
@@ -225,29 +229,19 @@ class RedisStatsCollector(BaseExtension):
         ]
 
         # Build timeline metrics dict
-        timeline_metrics = {"advanced_metrics/timeline_interval_minutes": interval_size}
+        timeline_metrics = {
+            "advanced_metrics/timeline_interval_minutes": interval_size}
         for i, interval_data in enumerate(timeline_sorted):
             timeline_metrics[f"advanced_metrics/timeline/{i}/interval"] = interval_data["interval"]
             timeline_metrics[f"advanced_metrics/timeline/{i}/items"] = interval_data["items"]
 
         return timeline_metrics
 
-    def _calculate_metrics(self, spider, status="running"):
+    def _calculate_metrics(self, spider, elapsed_time, status="running"):
         stats = self.stats.get_stats()
-
-        # Calculate elapsed time using Scrapy's built-in start_time
-        start_time = stats.get("start_time")
-        if start_time is not None:
-            now = datetime.now(
-                timezone.utc) if start_time.tzinfo else datetime.now()
-            elapsed_time = (now - start_time).total_seconds()
-        else:
-            # Fallback if start_time is not available (should not happen)
-            elapsed_time = 0
-
         elapsed_minutes = elapsed_time / 60
 
-        # CORE METRICS: Use Scrapy's built-in counters (no duplicates)
+        # CORE METRICS: Use Scrapy's built-in counters
         items = self.stats.get_value("item_scraped_count", 0)
         pages = self.stats.get_value("response_received_count", 0)
 
@@ -258,72 +252,75 @@ class RedisStatsCollector(BaseExtension):
         total_requests = self.stats.get_value("downloader/request_count", 0)
         status_200 = self.stats.get_value("downloader/response_count", 0)
 
-        http_success_rate = (status_200 / total_requests * 100) if total_requests > 0 else 0
-        http_success_rate = min(100.0, http_success_rate)
+        http_success_rate = min(
+            100.0, (status_200 / total_requests * 100) if total_requests > 0 else 0)
 
-        # Efficiency calculation based on requests per item
-        requests_per_item_obtained = total_requests / items if items > 0 else float('inf')
+        # Efficiency calculation
+        requests_per_item = total_requests / \
+            items if items > 0 else float('inf')
+        efficiency_factor = self._get_efficiency_factor(requests_per_item)
 
-        # Efficiency factor with penalties
-        if requests_per_item_obtained <= EFFICIENCY_EXCELLENT_THRESHOLD:
-            efficiency_factor = EFFICIENCY_EXCELLENT_FACTOR
-        elif requests_per_item_obtained <= EFFICIENCY_GOOD_THRESHOLD:
-            efficiency_factor = EFFICIENCY_GOOD_FACTOR
-        elif requests_per_item_obtained <= EFFICIENCY_FAIR_THRESHOLD:
-            efficiency_factor = EFFICIENCY_FAIR_FACTOR
-        elif requests_per_item_obtained <= EFFICIENCY_POOR_THRESHOLD:
-            efficiency_factor = EFFICIENCY_POOR_FACTOR
-        else:
-            efficiency_factor = EFFICIENCY_VERY_POOR_FACTOR
-
-        # Calculate success rate based on whether items_expected is defined
-        if self.items_expected:
-            goal_achievement = (items / self.items_expected * 100) if self.items_expected > 0 else 0
-            success_rate = (
-                (goal_achievement * self.success_rate_goal_weight +
-                 http_success_rate * self.success_rate_http_weight) * efficiency_factor
-            )
-            success_rate = min(100, max(0, success_rate))
-        else:
-            goal_achievement = None
-            success_rate = http_success_rate * efficiency_factor
-            success_rate = min(100, max(0, success_rate))
+        # Calculate success rate
+        success_rate, goal_achievement = self._calculate_success_rate(
+            items, http_success_rate, efficiency_factor
+        )
 
         peak_mem = self.stats.get_value("memusage/max", 0)
 
-        # Build complete metrics dict
-        metrics = {
-            # Spider info
+        return {
             "spider_name": spider.name,
             "status": status,
-            # Performance metrics
             "items_per_minute": round(items_per_min, 2),
             "pages_per_minute": round(pages_per_min, 2),
             "time_per_page_seconds": round(time_per_page, 2),
-            # Success metrics
             "success_rate": round(success_rate, 2),
             "http_success_rate": round(http_success_rate, 2),
-            # Efficiency metrics
-            "requests_per_item": round(requests_per_item_obtained, 2) if items > 0 and requests_per_item_obtained != float('inf') else 0,
+            "requests_per_item": round(requests_per_item, 2) if requests_per_item != float('inf') else 0,
             "efficiency_factor": round(efficiency_factor, 2),
-            # Resource metrics
+            "goal_achievement": round(goal_achievement, 2) if goal_achievement is not None else None,
             "resources/peak_memory_bytes": peak_mem,
-            # Advanced metrics (retry reasons and timeline)
             **self._get_retry_metrics(stats),
             **self._get_timeline_metrics(elapsed_minutes),
         }
 
-        return metrics, elapsed_time
+    def _get_efficiency_factor(self, requests_per_item):
+        """Get efficiency factor based on requests per item."""
+        if requests_per_item <= EFFICIENCY_EXCELLENT_THRESHOLD:
+            return EFFICIENCY_EXCELLENT_FACTOR
+        elif requests_per_item <= EFFICIENCY_GOOD_THRESHOLD:
+            return EFFICIENCY_GOOD_FACTOR
+        elif requests_per_item <= EFFICIENCY_FAIR_THRESHOLD:
+            return EFFICIENCY_FAIR_FACTOR
+        elif requests_per_item <= EFFICIENCY_POOR_THRESHOLD:
+            return EFFICIENCY_POOR_FACTOR
+        return EFFICIENCY_VERY_POOR_FACTOR
+
+    def _calculate_success_rate(self, items, http_success_rate, efficiency_factor):
+        """Calculate success rate and goal achievement."""
+        if self.items_expected:
+            goal_achievement = (items / self.items_expected *
+                                100) if self.items_expected > 0 else 0
+            success_rate = (
+                goal_achievement * self.success_rate_goal_weight +
+                http_success_rate * self.success_rate_http_weight
+            ) * efficiency_factor
+        else:
+            goal_achievement = None
+            success_rate = http_success_rate * efficiency_factor
+
+        return min(100, max(0, success_rate)), goal_achievement
 
     def spider_closed(self, spider, reason):
         if self.task.running:
             self.task.stop()
 
-        metrics, elapsed_time = self._calculate_metrics(spider, status=reason)
-
         stats = self.stats.get_stats()
-        stats.update({"elapsed_time_seconds": int(elapsed_time)})
+        elapsed_time = self._get_elapsed_time(stats)
+
+        metrics = self._calculate_metrics(spider, elapsed_time, status=reason)
+
         stats.update(metrics)
+        stats.update({"elapsed_time_seconds": int(elapsed_time)})
 
         try:
             self.redis_conn.delete(self.stats_key)
@@ -353,18 +350,24 @@ class RedisStatsCollector(BaseExtension):
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
-        start_time = stats.get("start_time")
-        if start_time is not None:
-            now = datetime.now(
-                timezone.utc) if start_time.tzinfo else datetime.now()
-            elapsed_time = (now - start_time).total_seconds()
-            stats.update({"elapsed_time_seconds": int(elapsed_time)})
+        elapsed_time = self._get_elapsed_time(stats)
 
-        # Calculate metrics on interval if continuous calculation is enabled
         if self.continuous_metrics_calculation:
-            metrics, elapsed_time = self._calculate_metrics(spider, status="running")
+            metrics = self._calculate_metrics(
+                spider, elapsed_time, status="running")
             stats.update(metrics)
-            stats.update({"elapsed_time_seconds": int(elapsed_time)})
+
+        stats.update({"elapsed_time_seconds": int(elapsed_time)})
 
         parsed_stats = json.dumps(stats, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))
+
+    def _get_elapsed_time(self, stats):
+        """Calculate elapsed time from start_time."""
+        start_time = stats.get("start_time")
+        if start_time is None:
+            return 0
+
+        now = datetime.now(
+            timezone.utc) if start_time.tzinfo else datetime.now()
+        return (now - start_time).total_seconds()
