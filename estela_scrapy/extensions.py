@@ -88,27 +88,18 @@ class RedisStatsCollector(BaseExtension):
         self.stats_key = os.getenv("REDIS_STATS_KEY")
         self.interval = float(os.getenv("REDIS_STATS_INTERVAL"))
 
-        # ADVANCED METRICS: Feature flag (experimental)
-        self.collect_advanced_metrics = (
-            os.getenv("ESTELA_COLLECT_ADVANCED_METRICS", "false").lower() == "true"
+        # METRICS CALCULATION TIMING: Controls when metrics are calculated
+        # true (default) = calculate continuously on every interval
+        # false = calculate only at spider_closed
+        self.continuous_metrics_calculation = (
+            os.getenv("ESTELA_CONTINUOUS_METRICS_CALCULATION", "false").lower() == "true"
         )
 
-        if self.collect_advanced_metrics:
-            self._init_advanced_metrics(schema, unique_field, max_buckets)
-        else:
-            # Set to None when disabled
-            self.items_expected = None
-            self.success_rate_goal_weight = None
-            self.success_rate_http_weight = None
-            self.schema = None
-            self.unique_field = None
-            self.max_buckets = None
-            self.http_status_counter = None
-            self.duplicate_items = None
-            self.timeline = None
+        # Always initialize all metrics tracking (no conditional)
+        self._init_metrics_tracking(schema, unique_field, max_buckets)
 
-    def _init_advanced_metrics(self, schema, unique_field, max_buckets):
-        """Initialize advanced metrics tracking (experimental feature)"""
+    def _init_metrics_tracking(self, schema, unique_field, max_buckets):
+        """Initialize all metrics tracking data structures"""
         # ITEMS EXPECTED: Goal-based metrics
         items_expected_env = os.getenv("ITEMS_EXPECTED")
         self.items_expected = int(items_expected_env) if items_expected_env else None
@@ -168,33 +159,20 @@ class RedisStatsCollector(BaseExtension):
         return ext
 
     def spider_opened(self, spider):
-        # ADVANCED: Initialize duplicate counter only if feature is enabled
-        if self.collect_advanced_metrics:
-            self.stats.set_value("advanced_metrics/items_duplicates", 0)
+        # Initialize duplicate counter
+        self.stats.set_value("advanced_metrics/items_duplicates", 0)
 
         update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)
         self.task.start(self.interval)
 
-    def response_received(self, response, request, spider):
-        # ADVANCED: HTTP status tracking
-        if self.collect_advanced_metrics:
-            self.http_status_counter[response.status] += 1
 
     def item_scraped(self, item, spider):
-        # ADVANCED: Collect advanced metrics if enabled
-        if self.collect_advanced_metrics:
-            self._track_advanced_metrics(item, spider)
+        # Track metrics for this item
+        self._track_item_metrics(item, spider)
 
-    def _track_advanced_metrics(self, item, spider):
-        """Track advanced metrics for an item (experimental feature)"""
-        # Schema validation (works with any callable: pydantic, custom validators, etc.)
-        if self.schema:
-            try:
-                self.schema(**item)
-                self.valid_items += 1
-            except Exception:  # Generic exception - works with any validator
-                self.invalid_items += 1
+    def _track_item_metrics(self, item, spider):
+        """Track timeline and duplicate metrics for each scraped item"""
 
         # Timeline tracking with cached time calculation (performance optimization)
         self.items_since_time_update += 1
@@ -221,6 +199,41 @@ class RedisStatsCollector(BaseExtension):
                 else:
                     self.duplicate_items.add(value)
 
+    def _get_retry_metrics(self, stats):
+        """Extract retry reason metrics from Scrapy stats"""
+        retry_metrics = {}
+        for key, value in stats.items():
+            if key.startswith("retry/reason_count/"):
+                reason = key.replace("retry/reason_count/", "")
+                retry_metrics[f"advanced_metrics/retries/by_reason/{reason}"] = value
+        return retry_metrics
+
+    def _get_timeline_metrics(self, elapsed_minutes):
+        """Aggregate timeline data into interval buckets"""
+        interval_size = max(1, math.ceil(elapsed_minutes / self.max_buckets))
+
+        # Aggregate minute buckets into larger intervals
+        aggregated = defaultdict(int)
+        for minute, count in self.timeline.items():
+            bucket_start = (minute // interval_size) * interval_size
+            bucket_end = bucket_start + interval_size
+            label = f"{bucket_start}-{bucket_end}m"
+            aggregated[label] += count
+
+        # Sort by interval start time
+        timeline_sorted = [
+            {"interval": k, "items": v}
+            for k, v in sorted(aggregated.items(), key=lambda x: int(x[0].split("-")[0]))
+        ]
+
+        # Build timeline metrics dict
+        timeline_metrics = {"advanced_metrics/timeline_interval_minutes": interval_size}
+        for i, interval_data in enumerate(timeline_sorted):
+            timeline_metrics[f"advanced_metrics/timeline/{i}/interval"] = interval_data["interval"]
+            timeline_metrics[f"advanced_metrics/timeline/{i}/items"] = interval_data["items"]
+
+        return timeline_metrics
+
     def _calculate_metrics(self, spider, status="running"):
         stats = self.stats.get_stats()
 
@@ -245,11 +258,7 @@ class RedisStatsCollector(BaseExtension):
         time_per_page = elapsed_time / pages if pages > 0 else 0
 
         total_requests = self.stats.get_value("downloader/request_count", 0)
-
-        if self.collect_advanced_metrics and self.http_status_counter:
-            status_200 = self.http_status_counter.get(200, 0)
-        else:
-            status_200 = self.stats.get_value("downloader/response_count", 0)
+        status_200 = self.stats.get_value("downloader/response_count", 0)
 
         http_success_rate = (status_200 / total_requests * 100) if total_requests > 0 else 0
         http_success_rate = min(100.0, http_success_rate)
@@ -284,70 +293,27 @@ class RedisStatsCollector(BaseExtension):
 
         peak_mem = self.stats.get_value("memusage/max", 0)
 
-        # Base metrics (always included)
+        # Build complete metrics dict
         metrics = {
+            # Spider info
             "spider_name": spider.name,
             "status": status,
+            # Performance metrics
             "items_per_minute": round(items_per_min, 2),
             "pages_per_minute": round(pages_per_min, 2),
             "time_per_page_seconds": round(time_per_page, 2),
+            # Success metrics
             "success_rate": round(success_rate, 2),
             "http_success_rate": round(http_success_rate, 2),
+            # Efficiency metrics
             "requests_per_item": round(requests_per_item_obtained, 2) if items > 0 and requests_per_item_obtained != float('inf') else 0,
             "efficiency_factor": round(efficiency_factor, 2),
+            # Resource metrics
             "resources/peak_memory_bytes": peak_mem,
+            # Advanced metrics (retry reasons and timeline)
+            **self._get_retry_metrics(stats),
+            **self._get_timeline_metrics(elapsed_minutes),
         }
-
-        # ADVANCED METRICS: Only if feature flag is enabled (prefixed with advanced_metrics/)
-        if self.collect_advanced_metrics:
-            # Goal achievement metrics
-            metrics["advanced_metrics/goal_achievement"] = round(goal_achievement or 0, 2)
-
-            # Schema validation metrics
-            total_checked = self.valid_items + self.invalid_items
-            schema_coverage_percentage = (
-                (self.valid_items / total_checked) * 100 if total_checked > 0 else 0
-            )
-            metrics["advanced_metrics/schema_coverage/percentage"] = round(schema_coverage_percentage, 2)
-            metrics["advanced_metrics/schema_coverage/valid"] = self.valid_items
-            metrics["advanced_metrics/schema_coverage/checked"] = total_checked
-
-            # HTTP status tracking
-            for status_code, count in self.http_status_counter.items():
-                metrics[f"advanced_metrics/http_errors/{status_code}"] = count
-
-            # Retry reasons
-            retry_reasons = {
-                k.replace("retry/reason_count/", ""): v
-                for k, v in stats.items()
-                if k.startswith("retry/reason_count/")
-            }
-            for reason, count in retry_reasons.items():
-                metrics[f"advanced_metrics/retries/by_reason/{reason}"] = count
-
-            # Timeline aggregation (minute-based buckets)
-            interval_size = max(1, math.ceil(elapsed_minutes / self.max_buckets))
-            metrics["advanced_metrics/timeline_interval_minutes"] = interval_size
-
-            aggregated = defaultdict(int)
-            # Timeline is now stored as minute buckets, aggregate into larger intervals
-            for minute, count in self.timeline.items():
-                bucket_start = (minute // interval_size) * interval_size
-                bucket_end = bucket_start + interval_size
-                label = f"{bucket_start}-{bucket_end}m"
-                aggregated[label] += count
-
-            timeline_sorted = [
-                {"interval": k, "items": v}
-                for k, v in sorted(
-                    aggregated.items(),
-                    key=lambda x: int(x[0].split("-")[0])
-                )
-            ]
-
-            for i, interval_data in enumerate(timeline_sorted):
-                metrics[f"advanced_metrics/timeline/{i}/interval"] = interval_data["interval"]
-                metrics[f"advanced_metrics/timeline/{i}/items"] = interval_data["items"]
 
         return metrics, elapsed_time
 
@@ -388,12 +354,13 @@ class RedisStatsCollector(BaseExtension):
         producer.send("job_stats", data)
 
     def store_stats(self, spider):
-        metrics, elapsed_time = self._calculate_metrics(
-            spider, status="running")
-
         stats = self.stats.get_stats()
-        stats.update({"elapsed_time_seconds": int(elapsed_time)})
-        stats.update(metrics)
+
+        # Calculate metrics on interval if continuous calculation is enabled
+        if self.continuous_metrics_calculation:
+            metrics, elapsed_time = self._calculate_metrics(spider, status="running")
+            stats.update(metrics)
+            stats.update({"elapsed_time_seconds": int(elapsed_time)})
 
         parsed_stats = json.dumps(stats, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))
