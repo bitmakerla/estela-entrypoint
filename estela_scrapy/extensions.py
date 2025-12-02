@@ -153,8 +153,6 @@ class RedisStatsCollector(BaseExtension):
         crawler.signals.connect(
             ext.spider_closed, signal=signals.spider_closed)
         crawler.signals.connect(ext.item_scraped, signal=signals.item_scraped)
-        crawler.signals.connect(ext.response_received,
-                                signal=signals.response_received)
 
         return ext
 
