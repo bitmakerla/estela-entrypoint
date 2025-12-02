@@ -353,6 +353,12 @@ class RedisStatsCollector(BaseExtension):
 
     def store_stats(self, spider):
         stats = self.stats.get_stats()
+        start_time = stats.get("start_time")
+        if start_time is not None:
+            now = datetime.now(
+                timezone.utc) if start_time.tzinfo else datetime.now()
+            elapsed_time = (now - start_time).total_seconds()
+            stats.update({"elapsed_time_seconds": int(elapsed_time)})
 
         # Calculate metrics on interval if continuous calculation is enabled
         if self.continuous_metrics_calculation:
