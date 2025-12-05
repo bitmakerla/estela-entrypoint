@@ -182,8 +182,9 @@ class RedisStatsCollector(BaseExtension):
             # Update time every N items instead of every item
             start_time = self.stats.get_stats().get("start_time")
             if start_time:
+                now = datetime.now(timezone.utc) if start_time.tzinfo else datetime.now()
                 self.cached_elapsed_seconds = int(
-                    (datetime.now() - start_time).total_seconds()
+                    (now - start_time).total_seconds()
                 )
             self.items_since_time_update = 0
 
@@ -277,7 +278,7 @@ class RedisStatsCollector(BaseExtension):
             "http_success_rate": round(http_success_rate, 2),
             "requests_per_item": round(requests_per_item, 2) if requests_per_item != float('inf') else 0,
             "efficiency_factor": round(efficiency_factor, 2),
-            "goal_achievement": round(goal_achievement, 2) if goal_achievement is not None else None,
+            "goal_achievement": round(goal_achievement, 2) if goal_achievement is not None else 0,
             "resources/peak_memory_bytes": peak_mem,
             **self._get_retry_metrics(stats),
             **self._get_timeline_metrics(elapsed_minutes),
@@ -352,20 +353,20 @@ class RedisStatsCollector(BaseExtension):
         stats = self.stats.get_stats()
         elapsed_time = self._get_elapsed_time(stats)
 
-        stats["elapsed_time_seconds"] = int(elapsed_time)
-
+        stats_to_store = dict(stats)
         if self.continuous_metrics_calculation:
             metrics = self._calculate_metrics(spider, elapsed_time, status="running")
-            stats.update(metrics)
-
-        parsed_stats = json.dumps(stats, default=json_serializer)
+            stats_to_store.update(metrics)
+        
+        stats_to_store["elapsed_time_seconds"] = int(elapsed_time)
+        
+        parsed_stats = json.dumps(stats_to_store, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))
 
     def _get_elapsed_time(self, stats):
         start_time = stats.get("start_time")
         if start_time is not None:
-            now = datetime.now(
-                timezone.utc) if start_time.tzinfo else datetime.now()
+            now = datetime.now(timezone.utc) if start_time.tzinfo else datetime.now()
             elapsed_time = (now - start_time).total_seconds()
             return elapsed_time
         return 0
