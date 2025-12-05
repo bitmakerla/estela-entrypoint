@@ -353,20 +353,19 @@ class RedisStatsCollector(BaseExtension):
         stats = self.stats.get_stats()
         elapsed_time = self._get_elapsed_time(stats)
 
-        stats_to_store = dict(stats)
         if self.continuous_metrics_calculation:
             metrics = self._calculate_metrics(spider, elapsed_time, status="running")
-            stats_to_store.update(metrics)
-        
-        stats_to_store["elapsed_time_seconds"] = int(elapsed_time)
-        
-        parsed_stats = json.dumps(stats_to_store, default=json_serializer)
+            stats.update(metrics)
+
+        stats["elapsed_time_seconds"] = int(elapsed_time)
+        parsed_stats = json.dumps(stats, default=json_serializer)
         self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))
 
     def _get_elapsed_time(self, stats):
         start_time = stats.get("start_time")
         if start_time is not None:
-            now = datetime.now(timezone.utc) if start_time.tzinfo else datetime.now()
+            now = datetime.now(
+                timezone.utc) if start_time.tzinfo else datetime.now()
             elapsed_time = (now - start_time).total_seconds()
             return elapsed_time
         return 0
