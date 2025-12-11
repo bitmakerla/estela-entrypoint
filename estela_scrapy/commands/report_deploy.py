@@ -171,6 +171,14 @@ class Command(ScrapyCommand):
         Promote candidate image to production using boto3.
         Retags estela_{pid}_candidate to estela_{pid}.
         """
+        # PARCHE PARA DESARROLLO LOCAL
+        credentials_type = os.getenv('CREDENTIALS', '').lower()
+        print("Credentials:", credentials_type)
+        if credentials_type == 'local':
+            logging.info("Running in local mode - skipping ECR promotion")
+            return True
+        
+        # CÓDIGO ORIGINAL CONTINÚA AQUÍ
         try:
             import boto3
             from botocore.exceptions import ClientError
@@ -222,7 +230,7 @@ class Command(ScrapyCommand):
         except Exception as e:
             logging.error(f"Unexpected error promoting image: {e}", exc_info=True)
             return False
-    
+        
     def cleanup_candidate_image(self, config: Dict[str, Any]) -> bool:
         """
         Delete candidate image to save storage costs using boto3.
