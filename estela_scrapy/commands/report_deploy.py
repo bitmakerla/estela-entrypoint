@@ -1,8 +1,10 @@
+import io
 import json
 import logging
 import os
 import sys
-from typing import List, Dict, Any
+import traceback
+from typing import List, Dict, Any, Optional
 
 from scrapy.commands import ScrapyCommand
 from scrapy.utils.project import get_project_settings
@@ -36,11 +38,20 @@ class Command(ScrapyCommand):
     def run(self, args, opts):
         """Main entry point for the command."""
         self.setup_logging()
-        
+
+        # Capture logs for error_reason on failure
+        log_buffer = io.StringIO()
+        log_handler = logging.StreamHandler(log_buffer)
+        log_handler.setFormatter(logging.Formatter(
+            '%(asctime)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        ))
+        logging.getLogger().addHandler(log_handler)
+
         logging.info("=" * 60)
         logging.info("Estela Deploy Reporter")
         logging.info("=" * 60)
-        
+
         try:
             # Parse environment configuration
             config = self.parse_environment()
@@ -81,7 +92,8 @@ class Command(ScrapyCommand):
                     logging.info("Keeping failed candidate image for debugging (CLEANUP_CANDIDATE_IMAGES=false)")
             
             # Update deploy status via API
-            success = self.update_deploy_status(config, status, spiders)
+            error_reason = log_buffer.getvalue() if status == 'FAILURE' else None
+            success = self.update_deploy_status(config, status, spiders, error_reason=error_reason)
             
             if not success:
                 logging.error("Failed to update deploy status in API")
@@ -98,14 +110,15 @@ class Command(ScrapyCommand):
             
         except Exception as e:
             logging.error(f"Fatal error: {e}", exc_info=True)
-            
-            # Try to report failure
+
+            # Try to report failure with captured logs + traceback
             try:
                 config = self.parse_environment()
-                self.update_deploy_status(config, 'FAILURE', [])
+                error_reason = log_buffer.getvalue() + "\n" + traceback.format_exc()
+                self.update_deploy_status(config, 'FAILURE', [], error_reason=error_reason)
             except:
                 pass
-            
+
             sys.exit(1)
     
     def setup_logging(self):
@@ -119,14 +132,9 @@ class Command(ScrapyCommand):
     def get_project_spiders(self) -> List[str]:
         """
         Get list of spiders directly from crawler's spider_loader.
-        Uses the same approach as describe_project command.
+        Lets exceptions propagate so the outer handler can capture the traceback.
         """
-        try:
-            # Access spider_loader through crawler_process
-            return sorted(self.crawler_process.spider_loader.list())
-        except Exception as e:
-            logging.error(f"Error detecting spiders: {e}")
-            return []
+        return sorted(self.crawler_process.spider_loader.list())
     
     def parse_environment(self) -> Dict[str, Any]:
         """
@@ -270,7 +278,7 @@ class Command(ScrapyCommand):
             logging.warning(f"Error cleaning candidate image: {e}", exc_info=True)
             return False
     
-    def update_deploy_status(self, config: Dict[str, Any], status: str, spiders: List[str]) -> bool:
+    def update_deploy_status(self, config: Dict[str, Any], status: str, spiders: List[str], error_reason: Optional[str] = None) -> bool:
         """
         Update deploy status via Estela API.
         
@@ -297,8 +305,10 @@ class Command(ScrapyCommand):
         
         payload = {
             'status': status,
-            'spiders_names': spiders
+            'spiders_names': spiders,
         }
+        if error_reason:
+            payload['error_reason'] = error_reason
         
         logging.info(f"Updating deploy status: PUT {url}")
         logging.debug(f"Payload: {payload}")
