@@ -45,8 +45,10 @@ DEFAULT_SUCCESS_RATE_HTTP_WEIGHT = 0.3
 DEFAULT_MAX_DUPLICATE_TRACKING = 100_000
 DEFAULT_TIMELINE_BUCKETS = 30
 
-# Per-item stat padding: rough BSON footprint of a default Mongo ``_id`` (ObjectId) field.
-ITEM_SIZE_MONGO_OBJECTID_BYTES = 17
+# Default per-item ``item_byte_size`` padding for a stored primary key / id field
+# (override with ``ESTELA_ITEM_BYTE_SIZE_ID_PADDING_BYTES``). 17 is a common value
+# when the sink adds a compact binary id (e.g. BSON ObjectId-style ``_id``).
+DEFAULT_ITEM_BYTE_SIZE_ID_PADDING_BYTES = 17
 
 
 class BaseExtension:
@@ -106,6 +108,13 @@ class RedisStatsCollector(BaseExtension):
         self.continuous_metrics_calculation = (
             os.getenv("ESTELA_CONTINUOUS_METRICS_CALCULATION",
                       "false").lower() == "true"
+        )
+
+        self._item_byte_size_id_padding_bytes = int(
+            os.getenv(
+                "ESTELA_ITEM_BYTE_SIZE_ID_PADDING_BYTES",
+                str(DEFAULT_ITEM_BYTE_SIZE_ID_PADDING_BYTES),
+            )
         )
 
         # Always initialize all metrics tracking (no conditional)
@@ -193,11 +202,14 @@ class RedisStatsCollector(BaseExtension):
         )
 
     def _item_stat_byte_size(self, item):
-        """JSON UTF-8 payload size (job shape) plus fixed Mongo-style ``_id`` padding."""
+        """JSON UTF-8 payload size (job shape) plus stored-id padding bytes.
+
+        Padding is ``ESTELA_ITEM_BYTE_SIZE_ID_PADDING_BYTES`` (default 17).
+        """
         exported = dict(self._item_size_exporter.export_item(item))
         return (
             self._item_json_payload_byte_size(exported)
-            + ITEM_SIZE_MONGO_OBJECTID_BYTES
+            + self._item_byte_size_id_padding_bytes
         )
 
     def _track_item_metrics(self, item, spider):
