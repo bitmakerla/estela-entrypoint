@@ -1,8 +1,27 @@
 import json
+import os
 from datetime import date, datetime, timedelta
 
 import requests
 from estela_queue_adapter import get_producer_interface
+
+# Default padding for a stored document id (e.g. BSON ObjectId-style ``_id``) in
+# ``*_obj_byte_size`` stats. Override with ``ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES``.
+DEFAULT_OBJ_BYTE_SIZE_ID_PADDING_BYTES = 17
+
+_obj_byte_size_id_padding_cache = None
+
+
+def get_obj_byte_size_id_padding_bytes():
+    global _obj_byte_size_id_padding_cache
+    if _obj_byte_size_id_padding_cache is None:
+        _obj_byte_size_id_padding_cache = int(
+            os.getenv(
+                "ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES",
+                str(DEFAULT_OBJ_BYTE_SIZE_ID_PADDING_BYTES),
+            )
+        )
+    return _obj_byte_size_id_padding_cache
 
 
 def parse_time(date=None):

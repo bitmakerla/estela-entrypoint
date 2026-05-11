@@ -8,7 +8,12 @@ import warnings
 from estela_queue_adapter import queue_noisy_libraries
 from twisted.python import log as txlog
 
-from estela_scrapy.utils import json_serializer, producer, to_standard_str
+from estela_scrapy.utils import (
+    get_obj_byte_size_id_padding_bytes,
+    json_serializer,
+    producer,
+    to_standard_str,
+)
 
 _stderr = sys.stderr
 
@@ -29,7 +34,7 @@ def _logfn(level, message, parent="none"):
     if _scrapy_stats is not None:
         payload_byte_size = len(
             json.dumps(data["payload"], default=json_serializer).encode("utf-8")
-        )
+        ) + get_obj_byte_size_id_padding_bytes()
         _scrapy_stats.inc_value("log_obj_byte_size", payload_byte_size)
     producer.send("job_logs", data)
 

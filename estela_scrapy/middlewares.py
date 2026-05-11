@@ -8,7 +8,12 @@ from scrapy.utils.python import to_bytes
 from scrapy.utils.request import fingerprint as request_fingerprint
 from twisted.web import http
 
-from estela_scrapy.utils import json_serializer, parse_time, producer
+from estela_scrapy.utils import (
+    get_obj_byte_size_id_padding_bytes,
+    json_serializer,
+    parse_time,
+    producer,
+)
 
 proxy_logger = logging.getLogger("proxy_mw")
 
@@ -47,7 +52,7 @@ class StorageDownloaderMiddleware:
         if self.stats is not None:
             payload_byte_size = len(
                 json.dumps(payload, default=json_serializer).encode("utf-8")
-            )
+            ) + get_obj_byte_size_id_padding_bytes()
             self.stats.inc_value("request_obj_byte_size", payload_byte_size)
         data = {
             "jid": os.getenv("ESTELA_SPIDER_JOB"),

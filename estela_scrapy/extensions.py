@@ -10,7 +10,12 @@ from scrapy.exceptions import NotConfigured
 from scrapy.exporters import PythonItemExporter
 from twisted.internet import task
 
-from estela_scrapy.utils import json_serializer, producer, update_job
+from estela_scrapy.utils import (
+    get_obj_byte_size_id_padding_bytes,
+    json_serializer,
+    producer,
+    update_job,
+)
 
 import logging
 
@@ -44,12 +49,6 @@ DEFAULT_SUCCESS_RATE_HTTP_WEIGHT = 0.3
 # Memory limits
 DEFAULT_MAX_DUPLICATE_TRACKING = 100_000
 DEFAULT_TIMELINE_BUCKETS = 30
-
-# Default per-item ``item_obj_byte_size`` padding for a stored primary key / id field
-# (override with ``ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES``). 17 is a common value
-# when the sink adds a compact binary id (e.g. BSON ObjectId-style ``_id``).
-DEFAULT_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES = 17
-
 
 class BaseExtension:
     def __init__(self, stats, *args, **kwargs):
@@ -110,11 +109,8 @@ class RedisStatsCollector(BaseExtension):
                       "false").lower() == "true"
         )
 
-        self._item_obj_byte_size_id_padding_bytes = int(
-            os.getenv(
-                "ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES",
-                str(DEFAULT_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES),
-            )
+        self._item_obj_byte_size_id_padding_bytes = (
+            get_obj_byte_size_id_padding_bytes()
         )
 
         # Always initialize all metrics tracking (no conditional)
