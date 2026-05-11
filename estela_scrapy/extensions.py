@@ -45,6 +45,9 @@ DEFAULT_SUCCESS_RATE_HTTP_WEIGHT = 0.3
 DEFAULT_MAX_DUPLICATE_TRACKING = 100_000
 DEFAULT_TIMELINE_BUCKETS = 30
 
+# Per-item stat padding: rough BSON footprint of a default Mongo ``_id`` (ObjectId) field.
+ITEM_SIZE_MONGO_OBJECTID_BYTES = 17
+
 
 class BaseExtension:
     def __init__(self, stats, *args, **kwargs):
@@ -89,6 +92,10 @@ class RedisStatsCollector(BaseExtension):
         if not redis_url:
             raise NotConfigured("REDIS_URL not found in the settings")
         self.redis_conn = redis.from_url(redis_url)
+
+        self._item_size_exporter = PythonItemExporter(
+            binary=False, dont_fail=True
+        )
 
         self.stats_key = os.getenv("REDIS_STATS_KEY")
         self.interval = float(os.getenv("REDIS_STATS_INTERVAL"))
@@ -169,6 +176,7 @@ class RedisStatsCollector(BaseExtension):
     def spider_opened(self, spider):
         # Initialize duplicate counter
         self.stats.set_value("advanced_metrics/items_duplicates", 0)
+        self.stats.set_value("item_byte_size", 0)
 
         update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)
@@ -178,8 +186,24 @@ class RedisStatsCollector(BaseExtension):
         # Track metrics for this item
         self._track_item_metrics(item, spider)
 
+    def _item_json_payload_byte_size(self, exported_dict):
+        """UTF-8 byte length of JSON (same encoding as job payloads)."""
+        return len(
+            json.dumps(exported_dict, default=json_serializer).encode("utf-8")
+        )
+
+    def _item_stat_byte_size(self, item):
+        """JSON UTF-8 payload size (job shape) plus fixed Mongo-style ``_id`` padding."""
+        exported = dict(self._item_size_exporter.export_item(item))
+        return (
+            self._item_json_payload_byte_size(exported)
+            + ITEM_SIZE_MONGO_OBJECTID_BYTES
+        )
+
     def _track_item_metrics(self, item, spider):
         """Track timeline and duplicate metrics for each scraped item"""
+
+        self.stats.inc_value("item_byte_size", self._item_stat_byte_size(item))
 
         # Timeline tracking with cached time calculation (performance optimization)
         self.items_since_time_update += 1
