@@ -186,6 +186,7 @@ class RedisStatsCollector(BaseExtension):
         # Initialize duplicate counter
         self.stats.set_value("advanced_metrics/items_duplicates", 0)
         self.stats.set_value("item_byte_size", 0)
+        self.stats.set_value("request_byte_size", 0)
 
         update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)
