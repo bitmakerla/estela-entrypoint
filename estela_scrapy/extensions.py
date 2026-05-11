@@ -174,6 +174,10 @@ class RedisStatsCollector(BaseExtension):
             max_buckets=max_buckets
         )
 
+        from estela_scrapy.log import set_scrapy_stats
+
+        set_scrapy_stats(crawler.stats)
+
         crawler.signals.connect(
             ext.spider_opened, signal=signals.spider_opened)
         crawler.signals.connect(
@@ -187,6 +191,7 @@ class RedisStatsCollector(BaseExtension):
         self.stats.set_value("advanced_metrics/items_duplicates", 0)
         self.stats.set_value("item_obj_byte_size", 0)
         self.stats.set_value("request_obj_byte_size", 0)
+        self.stats.set_value("log_obj_byte_size", 0)
 
         update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)

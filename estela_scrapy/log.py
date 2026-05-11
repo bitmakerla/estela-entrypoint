@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -7,9 +8,17 @@ import warnings
 from estela_queue_adapter import queue_noisy_libraries
 from twisted.python import log as txlog
 
-from estela_scrapy.utils import producer, to_standard_str
+from estela_scrapy.utils import json_serializer, producer, to_standard_str
 
 _stderr = sys.stderr
+
+# Set from RedisStatsCollector.from_crawler; logging may run before the crawler exists.
+_scrapy_stats = None
+
+
+def set_scrapy_stats(stats):
+    global _scrapy_stats
+    _scrapy_stats = stats
 
 
 def _logfn(level, message, parent="none"):
@@ -17,6 +26,11 @@ def _logfn(level, message, parent="none"):
         "jid": os.getenv("ESTELA_SPIDER_JOB"),
         "payload": {"log": str(message), "datetime": float(time.time())},
     }
+    if _scrapy_stats is not None:
+        payload_byte_size = len(
+            json.dumps(data["payload"], default=json_serializer).encode("utf-8")
+        )
+        _scrapy_stats.inc_value("log_obj_byte_size", payload_byte_size)
     producer.send("job_logs", data)
 
 
