@@ -45,10 +45,10 @@ DEFAULT_SUCCESS_RATE_HTTP_WEIGHT = 0.3
 DEFAULT_MAX_DUPLICATE_TRACKING = 100_000
 DEFAULT_TIMELINE_BUCKETS = 30
 
-# Default per-item ``item_byte_size`` padding for a stored primary key / id field
-# (override with ``ESTELA_ITEM_BYTE_SIZE_ID_PADDING_BYTES``). 17 is a common value
+# Default per-item ``item_obj_byte_size`` padding for a stored primary key / id field
+# (override with ``ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES``). 17 is a common value
 # when the sink adds a compact binary id (e.g. BSON ObjectId-style ``_id``).
-DEFAULT_ITEM_BYTE_SIZE_ID_PADDING_BYTES = 17
+DEFAULT_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES = 17
 
 
 class BaseExtension:
@@ -110,10 +110,10 @@ class RedisStatsCollector(BaseExtension):
                       "false").lower() == "true"
         )
 
-        self._item_byte_size_id_padding_bytes = int(
+        self._item_obj_byte_size_id_padding_bytes = int(
             os.getenv(
-                "ESTELA_ITEM_BYTE_SIZE_ID_PADDING_BYTES",
-                str(DEFAULT_ITEM_BYTE_SIZE_ID_PADDING_BYTES),
+                "ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES",
+                str(DEFAULT_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES),
             )
         )
 
@@ -185,8 +185,8 @@ class RedisStatsCollector(BaseExtension):
     def spider_opened(self, spider):
         # Initialize duplicate counter
         self.stats.set_value("advanced_metrics/items_duplicates", 0)
-        self.stats.set_value("item_byte_size", 0)
-        self.stats.set_value("request_byte_size", 0)
+        self.stats.set_value("item_obj_byte_size", 0)
+        self.stats.set_value("request_obj_byte_size", 0)
 
         update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
         self.task = task.LoopingCall(self.store_stats, spider)
@@ -205,18 +205,18 @@ class RedisStatsCollector(BaseExtension):
     def _item_stat_byte_size(self, item):
         """JSON UTF-8 payload size (job shape) plus stored-id padding bytes.
 
-        Padding is ``ESTELA_ITEM_BYTE_SIZE_ID_PADDING_BYTES`` (default 17).
+        Padding is ``ESTELA_ITEM_OBJ_BYTE_SIZE_ID_PADDING_BYTES`` (default 17).
         """
         exported = dict(self._item_size_exporter.export_item(item))
         return (
             self._item_json_payload_byte_size(exported)
-            + self._item_byte_size_id_padding_bytes
+            + self._item_obj_byte_size_id_padding_bytes
         )
 
     def _track_item_metrics(self, item, spider):
         """Track timeline and duplicate metrics for each scraped item"""
 
-        self.stats.inc_value("item_byte_size", self._item_stat_byte_size(item))
+        self.stats.inc_value("item_obj_byte_size", self._item_stat_byte_size(item))
 
         # Timeline tracking with cached time calculation (performance optimization)
         self.items_since_time_update += 1

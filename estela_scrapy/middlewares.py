@@ -48,7 +48,7 @@ class StorageDownloaderMiddleware:
             payload_byte_size = len(
                 json.dumps(payload, default=json_serializer).encode("utf-8")
             )
-            self.stats.inc_value("request_byte_size", payload_byte_size)
+            self.stats.inc_value("request_obj_byte_size", payload_byte_size)
         data = {
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
             "payload": payload,
