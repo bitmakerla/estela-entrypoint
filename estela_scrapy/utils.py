@@ -37,17 +37,21 @@ def update_job(
     item_count=0,
     request_count=0,
     proxy_usage_data={},
+    error_reason=None,
 ):
+    data = {
+        "status": status,
+        "lifespan": lifespan,
+        "total_response_bytes": total_bytes,
+        "item_count": item_count,
+        "request_count": request_count,
+        "proxy_usage_data": json.dumps(proxy_usage_data),
+    }
+    if error_reason:
+        data["error_reason"] = error_reason
     requests.patch(
         job_url,
-        data={
-            "status": status,
-            "lifespan": lifespan,
-            "total_response_bytes": total_bytes,
-            "item_count": item_count,
-            "request_count": request_count,
-            "proxy_usage_data": json.dumps(proxy_usage_data),
-        },
+        data=data,
         headers={"Authorization": "Token {}".format(auth_token)},
     )
 

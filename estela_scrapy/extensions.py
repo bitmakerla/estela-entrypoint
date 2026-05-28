@@ -1,6 +1,7 @@
 import json
 import os
 import math
+import traceback
 from datetime import datetime, timezone
 from collections import defaultdict
 
@@ -325,6 +326,7 @@ class RedisStatsCollector(BaseExtension):
         except Exception:
             pass
 
+        error_reason = None
         try:
             stats = self.stats.get_stats()
             elapsed_time = self._get_elapsed_time(stats)
@@ -333,7 +335,7 @@ class RedisStatsCollector(BaseExtension):
 
             stats.update(metrics)
             stats.update({"elapsed_time_seconds": int(elapsed_time)})
-            
+
             parsed_stats = json.dumps(stats, default=json_serializer)
             data = {
                 "jid": os.getenv("ESTELA_SPIDER_JOB"),
@@ -341,11 +343,12 @@ class RedisStatsCollector(BaseExtension):
             }
             producer.send("job_stats", data)
             job_status = COMPLETED_STATUS
-            
+
         except Exception as e:
             logger.error(f"Error during spider_closed: {e}", exc_info=True)
             job_status = ERROR_STATUS
-        
+            error_reason = traceback.format_exc()
+
         finally:
             try:
                 update_job(
@@ -360,6 +363,7 @@ class RedisStatsCollector(BaseExtension):
                         "proxy_name": stats.get("downloader/proxy_name", ""),
                         "bytes": stats.get("downloader/proxies/response_bytes", 0),
                     },
+                    error_reason=error_reason,
                 )
             except Exception as e:
                 logger.error(f"CRITICAL: Could not update job status: {e}", exc_info=True)
