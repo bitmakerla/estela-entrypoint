@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -7,7 +8,12 @@ from scrapy.utils.python import to_bytes
 from scrapy.utils.request import fingerprint as request_fingerprint
 from twisted.web import http
 
-from estela_scrapy.utils import parse_time, producer
+from estela_scrapy.utils import (
+    get_obj_byte_size_id_padding_bytes,
+    json_serializer,
+    parse_time,
+    producer,
+)
 
 proxy_logger = logging.getLogger("proxy_mw")
 
@@ -26,18 +32,31 @@ def get_status_size(response_status):
 
 
 class StorageDownloaderMiddleware:
+    def __init__(self, stats=None):
+        self.stats = stats
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(stats=crawler.stats)
+
     def process_response(self, request, response, spider):
+        payload = {
+            "url": response.url,
+            "status": int(response.status),
+            "method": request.method,
+            "duration": int(request.meta.get("download_latency", 0) * 1000),
+            "time": parse_time(),
+            "response_size": len(response.body),
+            "fingerprint": request_fingerprint(request),
+        }
+        if self.stats is not None:
+            payload_byte_size = len(
+                json.dumps(payload, default=json_serializer).encode("utf-8")
+            ) + get_obj_byte_size_id_padding_bytes()
+            self.stats.inc_value("request_obj_byte_size", payload_byte_size)
         data = {
             "jid": os.getenv("ESTELA_SPIDER_JOB"),
-            "payload": {
-                "url": response.url,
-                "status": int(response.status),
-                "method": request.method,
-                "duration": int(request.meta.get("download_latency", 0) * 1000),
-                "time": parse_time(),
-                "response_size": len(response.body),
-                "fingerprint": request_fingerprint(request),
-            },
+            "payload": payload,
         }
         producer.send("job_requests", data)
         return response
