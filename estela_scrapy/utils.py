@@ -1,8 +1,15 @@
 import json
+import logging
+import time
 from datetime import date, datetime, timedelta
 
 import requests
 from estela_queue_adapter import get_producer_interface
+
+logger = logging.getLogger(__name__)
+
+UPDATE_JOB_ATTEMPTS = 3
+UPDATE_JOB_TIMEOUT = 10
 
 
 def parse_time(date=None):
@@ -49,11 +56,24 @@ def update_job(
     }
     if error_reason:
         data["error_reason"] = error_reason
-    requests.patch(
-        job_url,
-        data=data,
-        headers={"Authorization": "Token {}".format(auth_token)},
-    )
+    for attempt in range(1, UPDATE_JOB_ATTEMPTS + 1):
+        try:
+            response = requests.patch(
+                job_url,
+                data=data,
+                headers={"Authorization": "Token {}".format(auth_token)},
+                timeout=UPDATE_JOB_TIMEOUT,
+            )
+            response.raise_for_status()
+            return
+        except requests.RequestException as e:
+            logger.warning(
+                "Could not update job status to %s (attempt %d/%d): %s",
+                status, attempt, UPDATE_JOB_ATTEMPTS, e,
+            )
+            if attempt == UPDATE_JOB_ATTEMPTS:
+                raise
+            time.sleep(2 ** (attempt - 1))
 
 
 producer = get_producer_interface()
