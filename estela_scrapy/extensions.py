@@ -171,7 +171,10 @@ class RedisStatsCollector(BaseExtension):
         # Initialize duplicate counter
         self.stats.set_value("advanced_metrics/items_duplicates", 0)
 
-        update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
+        try:
+            update_job(self.job_url, self.auth_token, status=RUNNING_STATUS)
+        except Exception as e:
+            logger.error(f"Could not report RUNNING status: {e}", exc_info=True)
         self.task = task.LoopingCall(self.store_stats, spider)
         self.task.start(self.interval)
 
@@ -369,16 +372,24 @@ class RedisStatsCollector(BaseExtension):
                 logger.error(f"CRITICAL: Could not update job status: {e}", exc_info=True)
 
     def store_stats(self, spider):
-        stats = self.stats.get_stats()
-        elapsed_time = self._get_elapsed_time(stats)
+        # An exception here would stop the LoopingCall for the rest of the job.
+        try:
+            stats = self.stats.get_stats()
+            elapsed_time = self._get_elapsed_time(stats)
 
-        if self.continuous_metrics_calculation:
-            metrics = self._calculate_metrics(spider, elapsed_time, status="running")
-            stats.update(metrics)
+            if self.continuous_metrics_calculation:
+                metrics = self._calculate_metrics(spider, elapsed_time, status="running")
+                stats.update(metrics)
 
-        stats["elapsed_time_seconds"] = int(elapsed_time)
-        parsed_stats = json.dumps(stats, default=json_serializer)
-        self.redis_conn.hmset(self.stats_key, json.loads(parsed_stats))
+            stats["elapsed_time_seconds"] = int(elapsed_time)
+            parsed_stats = json.loads(json.dumps(stats, default=json_serializer))
+            # Redis only takes str/bytes/int/float; bools, None, dicts and lists are JSON-encoded.
+            self.redis_conn.hmset(self.stats_key, {
+                key: value if isinstance(value, str) else json.dumps(value)
+                for key, value in parsed_stats.items()
+            })
+        except Exception as e:
+            logger.error(f"Could not store stats: {e}", exc_info=True)
 
     def _get_elapsed_time(self, stats):
         start_time = stats.get("start_time")
